@@ -1,0 +1,2514 @@
+<!doctype html>
+<html lang="so"><head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Home - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --accent:#1F4B84; --accent2:#2E6DB4; --accent-d:#173863;
+      --bg:#0f172a; --card:#1e293b; --card2:#182338; --line:#334155;
+      --ink:#e2e8f0; --muted:#94a3b8; --soft:#263449;
+      --green:#22c55e; --red:#ef4444; --amber:#f59e0b; --blue:#38bdf8; --purple:#a78bfa; --pink:#e83e6b;
+      --gold:#c9a227; --gold2:#e3c568;
+      --blob1:rgba(46,109,180,.85); --blob2:rgba(31,75,132,.9); --blob3:rgba(201,162,39,.5); --blob4:rgba(34,211,238,.42); --blob5:rgba(232,62,107,.35);
+      --login1:rgba(8,20,42,.88); --login2:rgba(15,32,62,.84); --login3:rgba(31,75,132,.78);
+    }
+    /* ===== LIGHT MODE (maalin / indhaha) ===== */
+    body.light{
+      --bg:#f4f0e6; --card:#fffdf6; --card2:#f7f2e4; --line:#e0d8bf; --ink:#1d2733; --muted:#6a726e; --soft:#ece4cf;
+      --blob1:rgba(46,109,180,.5); --blob2:rgba(31,75,132,.42); --blob3:rgba(201,162,39,.55); --blob4:rgba(14,165,233,.4); --blob5:rgba(232,62,107,.3);
+      --login1:rgba(233,226,207,.92); --login2:rgba(246,241,227,.9); --login3:rgba(217,207,164,.9);
+    }
+    body.light #loginView{background:linear-gradient(135deg,#e9e2cf 0%,#f6f1e3 55%,#d9cfa4 130%);}
+    body.light .login-card{background:#fffdf6; border-color:rgba(201,162,39,.45);}
+    body.light .login-card h1, body.light .brand .t1{color:#1d2733;}
+    body.light .field input, body.light .field select, body.light .filterbar select{background:#fff; border-color:#d8cfb4; color:#1d2733;}
+    body.light .topbar{background:#f2ecdc; border-color:rgba(201,162,39,.4);}
+    body.light .kpi .val, body.light .an-card .val, body.light .receipt-box .rh .nm{color:#1d2733;}
+    body.light .card h3, body.light .modal-head h3{color:#8a6d1a;}
+    body.light tbody tr:hover{background:#f2ecda;}
+    body.light tbody td{border-color:#e8e0c8;}
+    body.light .receipt-box{background:#fff; border-color:#c9bf9e;}
+    body.light .toast{background:#fff; color:#1d2733; border-color:#e0d8bf;}
+    body.light .demo-banner{background:#fdf3d0; color:#7c5e10; border-color:#d4a72c;}
+    body.light .modal-overlay{background:rgba(30,26,10,.45);}
+    body.light .user-chip .nm{color:#1d2733;}
+    body.light .scan-text{background:#fff; color:#4a4f45;}
+    *{box-sizing:border-box; margin:0; padding:0;}
+    body{font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink);}
+    .hidden{display:none !important;}
+
+    /* ============ LOGIN ============ */
+    #loginView{
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg, var(--login1) 0%, var(--login2) 55%, var(--login3) 130%);
+      padding:20px; position:relative; overflow:hidden;
+    }
+    #loginView::before{
+      content:""; position:absolute; width:520px; height:520px; border-radius:50%;
+      background:rgba(255,255,255,.05); top:-160px; right:-140px;
+    }
+    #loginView::after{
+      content:""; position:absolute; width:360px; height:360px; border-radius:50%;
+      background:rgba(255,255,255,.04); bottom:-120px; left:-100px;
+    }
+    .login-card{
+      position:relative; z-index:2; background:var(--card); border:1px solid rgba(201,162,39,.4);
+      border-radius:22px; width:100%; max-width:400px; padding:38px 34px 30px;
+      box-shadow:0 24px 60px rgba(0,0,0,.5);
+    }
+    .login-logo{
+      width:64px; height:64px; border-radius:18px; margin:0 auto 14px;
+      background:linear-gradient(135deg,var(--accent),var(--gold2)); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:24px; letter-spacing:.5px; box-shadow:0 8px 20px rgba(31,75,132,.45);
+    }
+    .login-card h1{text-align:center; font-size:21px; font-weight:800; color:#fff; font-family:'Playfair Display',serif;}
+    .login-card p.sub{text-align:center; color:var(--muted); font-size:13px; margin:4px 0 24px;}
+    .field{margin-bottom:14px;}
+    .field label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:6px;}
+    .field input,.field select{
+      width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px;
+      font-size:14px; font-family:inherit; outline:none; transition:.15s;
+      background:#0f1a2e; color:var(--ink);
+    }
+    .field input:focus,.field select:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,.18);}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:14px;
+      border-radius:12px; padding:12px 20px; transition:.15s;
+    }
+    .btn-primary{width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 8px 18px rgba(31,75,132,.35);}
+    .btn-primary:hover{transform:translateY(-1px); box-shadow:0 12px 24px rgba(201,162,39,.35);}
+    .btn-primary:disabled{opacity:.6; transform:none;}
+    .login-err{display:none; background:#2a1520; color:#fda4af; border:1px solid #7f1d1d;
+      padding:10px 12px; border-radius:10px; font-size:13px; margin-bottom:14px;}
+    .login-err.show{display:block;}
+    .login-foot{text-align:center; color:var(--muted); font-size:11.5px; margin-top:18px;}
+
+    /* ============ DASHBOARD ============ */
+    #dashView{min-height:100vh;}
+    .topbar{
+      position:sticky; top:0; z-index:50; background:#0b1526; border-bottom:1px solid rgba(201,162,39,.35);
+      display:flex; align-items:center; gap:10px; padding:10px 22px; flex-wrap:wrap;
+    }
+    .brand{display:flex; align-items:center; gap:10px; min-width:0; margin-right:6px;}
+    .brand .logo{
+      width:38px; height:38px; border-radius:11px; flex:0 0 auto;
+      background:linear-gradient(135deg,var(--accent),var(--gold2)); color:#fff;
+      display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;
+    }
+    .brand .t1{font-weight:800; font-size:15px; color:#fff; line-height:1.1; white-space:nowrap; font-family:'Playfair Display',serif;}
+    .brand .t2{font-size:11px; color:var(--muted); white-space:nowrap;}
+    .topbar .spacer{flex:1;}
+    .act-btns{display:flex; gap:8px; flex-wrap:wrap;}
+    .btn-sm{padding:9px 14px; border-radius:10px; font-size:12.5px;}
+    .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+    .btn-outline:hover{background:var(--soft); border-color:var(--accent2);}
+    .btn-green{background:#16a34a; color:#fff;}
+    .btn-green:hover{background:#15803d;}
+    .btn-blue{background:var(--accent2); color:#fff;}
+    .btn-blue:hover{background:var(--accent);}
+    .btn-amber{background:#d97706; color:#fff;}
+    .btn-amber:hover{background:#b45309;}
+    .user-chip{
+      display:flex; align-items:center; gap:10px; background:var(--soft);
+      border:1px solid var(--line); border-radius:999px; padding:5px 8px 5px 14px;
+    }
+    .user-chip .avatar{
+      width:30px; height:30px; border-radius:50%; background:var(--accent2); color:#fff;
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;
+    }
+    .user-chip .nm{font-size:12.5px; font-weight:600; line-height:1.15; color:var(--ink);}
+    .user-chip .rl{font-size:10.5px; color:var(--muted);}
+    .badge{font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; letter-spacing:.3px;}
+    .badge.admin{background:#fef3c7; color:#92400e;}
+    .badge.staff{background:#dbeafe; color:#1e40af;}
+    .btn-ghost{background:transparent; border:1.5px solid var(--line); color:var(--ink); padding:8px 14px;}
+    .btn-ghost:hover{background:var(--soft);}
+
+    .wrap{max-width:1280px; margin:0 auto; padding:20px 22px 60px;}
+    /* Filter bar */
+    .filterbar{
+      background:var(--card); border:1px solid var(--line); border-radius:16px;
+      padding:14px 18px; display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px;
+      box-shadow:0 4px 18px rgba(0,0,0,.25); margin-bottom:16px;
+    }
+    .filterbar .f{display:flex; flex-direction:column; gap:5px;}
+    .filterbar label{font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+    .filterbar select{
+      padding:9px 12px; border:1.5px solid var(--line); border-radius:10px; font-family:inherit;
+      font-size:13.5px; font-weight:600; background:#0f1a2e; color:var(--ink); outline:none; cursor:pointer; min-width:130px;
+    }
+    .filterbar select:focus{border-color:var(--gold);}
+    .filterbar .btn-primary{padding:9px 22px; border-radius:10px; box-shadow:none; font-size:13px;}
+    .period-chip{
+      align-self:center; margin-left:auto; background:var(--soft); color:var(--gold2);
+      font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:999px; border:1px solid rgba(201,162,39,.4);
+    }
+    .demo-banner{
+      display:none; margin-bottom:14px; background:#2a1f0e; border:1px solid #92400e; color:#fcd34d;
+      font-size:12.5px; font-weight:600; padding:10px 14px; border-radius:12px;
+    }
+    /* KPI */
+    .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin-bottom:14px;}
+    .kpi{
+      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px;
+      box-shadow:0 4px 18px rgba(0,0,0,.25); position:relative; overflow:hidden;
+    }
+    .kpi::before{content:""; position:absolute; top:0; left:0; right:0; height:3px;}
+    .kpi.green::before{background:linear-gradient(90deg,#16a34a,var(--gold2));}
+    .kpi.red::before{background:linear-gradient(90deg,#b91c1c,var(--gold2));}
+    .kpi.blue::before{background:linear-gradient(90deg,#1d4ed8,var(--gold2));}
+    .kpi.amber::before{background:linear-gradient(90deg,#b45309,var(--gold2));}
+    .kpi.purple::before{background:linear-gradient(90deg,#6d28d9,var(--gold2));}
+    .kpi.cyan::before{background:linear-gradient(90deg,#0e7490,var(--gold2));}
+    .kpi.pink::before{background:linear-gradient(90deg,#be185d,var(--gold2));}
+    .kpi .ico{
+      width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      font-size:17px; margin-bottom:10px;
+    }
+    .kpi.green .ico{background:#14532d;} .kpi.red .ico{background:#450a0a;}
+    .kpi.blue .ico{background:#1e3a8a;} .kpi.amber .ico{background:#78350f;}
+    .kpi.purple .ico{background:#4c1d95;} .kpi.cyan .ico{background:#164e63;} .kpi.pink .ico{background:#831843;}
+    .kpi .lbl{font-size:11.5px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+    .kpi .val{font-size:22px; font-weight:800; margin-top:3px; letter-spacing:-.3px; color:#fff;}
+    .kpi .sub{font-size:11.5px; color:var(--muted); margin-top:4px;}
+    .kpi .sub b{color:var(--ink);}
+    .kpi .val.pos{color:#4ade80;} .kpi .val.neg{color:#f87171;}
+    /* Analysis cards */
+    .an-card{display:flex; align-items:center; gap:12px; padding:13px 15px;}
+    .an-card .ico{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto;}
+    .an-card .inf{min-width:0;}
+    .an-card .lbl{font-size:10.5px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+    .an-card .val{font-size:16.5px; font-weight:800; color:#fff; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .an-card .sub{font-size:11px; color:var(--muted); margin-top:1px;}
+    /* progress */
+    .prog{height:8px; border-radius:999px; background:#334155; overflow:hidden; margin-top:7px;}
+    .prog .fill{height:100%; border-radius:999px; background:linear-gradient(90deg,var(--accent),#22c55e); transition:width .4s;}
+    /* Charts */
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:14px;}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px;
+      box-shadow:0 4px 18px rgba(0,0,0,.25);
+    }
+    .card h3{font-size:15px; font-weight:700; font-family:'Playfair Display',serif; margin-bottom:4px; color:var(--gold2);}
+    .card h3::after{content:""; display:block; width:40px; height:2px; margin-top:5px; border-radius:2px; background:linear-gradient(90deg,var(--gold2),transparent);}
+    .card .hint{font-size:11.5px; color:var(--muted); margin-bottom:12px;}
+    .card .chartbox{position:relative; height:280px;}
+    .card .chartbox.short{height:230px;}
+    .span8{grid-column:span 8;} .span4{grid-column:span 4;} .span6{grid-column:span 6;}
+    .span12{grid-column:span 12;}
+    @media(max-width:900px){ .span8,.span4,.span6{grid-column:span 12;} }
+    /* Overseas Orders panel */
+    .ov-panel{
+      margin-top:20px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px;
+      box-shadow:0 4px 18px rgba(0,0,0,.25);
+    }
+    .ov-head{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px;}
+    .ov-head h2{font-size:18px; font-weight:700; font-family:'Playfair Display',serif; color:var(--gold2);}
+    .ov-summary{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;}
+    @media(max-width:700px){ .ov-summary{grid-template-columns:1fr;} }
+    .ov-tile{
+      display:flex; align-items:center; gap:14px; padding:16px; border-radius:14px;
+      background:var(--soft); border:1px solid var(--line); border-left:4px solid var(--muted);
+    }
+    .ov-tile.amber{border-left-color:#f59e0b;}
+    .ov-tile.green{border-left-color:#4ade80;}
+    .ov-tile .ov-ico{font-size:26px;}
+    .ov-tile .ov-num{font-size:22px; font-weight:800; color:var(--ink);}
+    .ov-tile.amber .ov-num{color:#f59e0b;}
+    .ov-tile.green .ov-num{color:#4ade80;}
+    .ov-tile .ov-lbl{font-size:12px; color:var(--muted);}
+    .ov-tile .ov-sub{font-size:12px; font-weight:600; color:var(--ink); margin-top:2px;}
+    .ov-tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+    .ov-tab{
+      background:var(--soft); border:1px solid var(--line); color:var(--muted); font-size:12.5px; font-weight:600;
+      padding:7px 16px; border-radius:10px; cursor:pointer; transition:.15s;
+    }
+    .ov-tab:hover{color:var(--ink);}
+    .ov-tab.active{background:var(--gold2); color:#1a1305; border-color:var(--gold2);}
+    .ov-days{font-size:11px; color:var(--muted);}
+    .ov-days.warn{color:#f59e0b; font-weight:700;}
+    .ov-days.hot{color:#f87171; font-weight:700;}
+    .item-row{display:grid; grid-template-columns:1fr 90px 110px 90px 30px; gap:8px; align-items:center; margin-bottom:8px;}
+    @media(max-width:700px){ .item-row{grid-template-columns:1fr 1fr; grid-template-rows:auto auto;} }
+    .item-row input{
+      background:var(--soft); border:1px solid var(--line); color:var(--ink); border-radius:8px;
+      padding:8px 10px; font-size:13px; width:100%;
+    }
+    .item-row .item-total{font-size:12.5px; font-weight:700; color:var(--gold2); text-align:right;}
+    .item-row .item-del{background:none; border:none; color:#f87171; font-size:16px; cursor:pointer;}
+    /* Tables */
+    .tbl-scroll{overflow-x:auto;}
+    table{width:100%; border-collapse:collapse; font-size:13px;}
+    thead th{
+      text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.4px;
+      color:var(--muted); padding:8px 10px; border-bottom:2px solid var(--line); font-weight:700; white-space:nowrap;
+    }
+    tbody td{padding:9px 10px; border-bottom:1px solid #27364d; white-space:nowrap;}
+    tbody tr:hover{background:var(--soft);}
+    .mono{font-variant-numeric:tabular-nums; font-weight:600; color:var(--ink);}
+    .pos{color:#4ade80; font-weight:700;} .neg{color:#f87171; font-weight:700;}
+    .pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px; background:var(--soft); color:#93c5fd;}
+    .empty{text-align:center; color:var(--muted); padding:26px 0; font-size:13px;}
+    .toast{
+      position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#0f172a; color:#fff; border:1px solid var(--line); padding:11px 20px; border-radius:12px; font-size:13.5px;
+      opacity:0; pointer-events:none; transition:.25s; z-index:99; box-shadow:0 10px 30px rgba(0,0,0,.5);
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+    .loader{text-align:center; color:var(--muted); padding:60px 0; font-size:14px;}
+    /* Modal */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(2,6,17,.72); z-index:80; display:flex;
+      align-items:flex-start; justify-content:center; padding:30px 16px; overflow-y:auto;
+    }
+    .modal-card{
+      background:var(--card); border:1px solid var(--line); border-radius:18px; width:100%;
+      max-width:560px; box-shadow:0 30px 80px rgba(0,0,0,.6); margin-bottom:30px;
+    }
+    .modal-card.wide{max-width:720px;}
+    .modal-head{
+      display:flex; align-items:center; justify-content:space-between; padding:16px 20px;
+      border-bottom:1px solid var(--line);
+    }
+    .modal-head h3{font-size:15px; font-weight:800; color:#fff; font-family:'Playfair Display',serif;}
+    .modal-x{background:transparent; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1; padding:4px;}
+    .modal-x:hover{color:#fff;}
+    .modal-body{padding:20px;}
+    .modal-foot{padding:14px 20px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;}
+    .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+    .form-grid .full{grid-column:1 / -1;}
+    @media(max-width:640px){ .form-grid{grid-template-columns:1fr;} }
+    /* Receipt */
+    .receipt-box{
+      border:1.5px dashed var(--line); border-radius:14px; padding:18px; background:#0f1a2e; max-width:420px; margin:0 auto;
+    }
+    .receipt-box .rh{text-align:center; border-bottom:1px dashed var(--line); padding-bottom:10px; margin-bottom:10px;}
+    .receipt-box .rh .nm{font-weight:800; font-size:17px; color:#fff;}
+    .receipt-box .row{display:flex; justify-content:space-between; padding:5px 0; font-size:13px; gap:12px;}
+    .receipt-box .row .k{color:var(--muted);}
+    .receipt-box .row .v{font-weight:700; color:var(--ink); text-align:right;}
+    .receipt-box .total{border-top:1.5px dashed var(--line); margin-top:8px; padding-top:8px; font-size:15px;}
+    .receipt-box .total .v{color:#4ade80; font-size:17px;}
+    /* search results */
+    .result-box{margin-top:14px;}
+    .calc-box{background:var(--soft); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--muted); line-height:1.6;}
+    .calc-box b{color:var(--gold2);}
+    .scan-text{background:#0f1a2e; border:1px dashed var(--line); border-radius:10px; padding:10px; font-size:11.5px; max-height:120px; overflow:auto; white-space:pre-wrap; color:var(--muted); margin-top:8px;}
+    @media print{
+      body{background:#fff !important; color:#111 !important;}
+      .topbar .act-btns, .user-chip, .topbar .btn-ghost, .filterbar .btn, .filterbar .f, .period-chip, .demo-banner, .modal-overlay{display:none !important;}
+      .card, .kpi{box-shadow:none !important; break-inside:avoid;}
+      /* Receipt-ka kaliya */
+      body.print-receipt *{visibility:hidden !important;}
+      body.print-receipt #receiptModal, body.print-receipt #receiptModal *{visibility:visible !important;}
+      body.print-receipt #receiptModal{position:absolute; left:0; top:0; width:100%; max-width:420px; background:#fff; color:#000; border:none; box-shadow:none;}
+      body.print-receipt .receipt-box{background:#fff; border-color:#000; color:#000;}
+      body.print-receipt .receipt-box .rh .nm, body.print-receipt .receipt-box .row .v, body.print-receipt .receipt-box .total .v{color:#000;}
+      body.print-receipt .receipt-box .row .k{color:#333;}
+      body.print-receipt .modal-head, body.print-receipt .modal-foot{display:none;}
+    }
+    @media(max-width:640px){
+      .period-chip{margin-left:0; width:100%; text-align:center;}
+      .kpi .val{font-size:19px;}
+      .topbar{padding:10px 14px;}
+    }
+
+    /* ============================================================
+       v2 - LIQUID GLASS (Apple-style) + LIGHT MODE CONTRAST
+       ============================================================ */
+    .bg{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+    .bg i{position:absolute; border-radius:50%; filter:blur(80px); opacity:.55; will-change:transform;}
+    .bg .b1{width:560px; height:560px; top:-140px; left:-120px; background:radial-gradient(circle at 35% 35%, var(--blob1), transparent 62%); animation:lf1 26s ease-in-out infinite alternate;}
+    .bg .b2{width:520px; height:520px; bottom:-160px; right:-100px; background:radial-gradient(circle at 60% 40%, var(--blob2), transparent 62%); animation:lf2 32s ease-in-out infinite alternate;}
+    .bg .b3{width:420px; height:420px; top:22%; left:56%; background:radial-gradient(circle at 50% 50%, var(--blob3), transparent 65%); opacity:.4; animation:lf3 24s ease-in-out infinite alternate;}
+    .bg .b4{width:340px; height:340px; top:62%; left:6%; background:radial-gradient(circle at 50% 50%, var(--blob4), transparent 62%); opacity:.35; animation:lf4 28s ease-in-out infinite alternate;}
+    .bg .b5{width:300px; height:300px; top:8%; left:30%; background:radial-gradient(circle at 50% 50%, var(--blob5), transparent 60%); opacity:.3; animation:lf2 36s ease-in-out infinite alternate-reverse;}
+    @keyframes lf1{from{transform:translate(0,0) scale(1);} to{transform:translate(60px,40px) scale(1.12);}}
+    @keyframes lf2{from{transform:translate(0,0) scale(1);} to{transform:translate(-50px,30px) scale(1.08);}}
+    @keyframes lf3{from{transform:translate(0,0) scale(1);} to{transform:translate(-40px,-30px) scale(1.15);}}
+    @keyframes lf4{from{transform:translate(0,0) scale(1);} to{transform:translate(50px,-40px) scale(1.1);}}
+
+    /* dhalo (glass) - dark */
+    .login-card, .topbar, .filterbar, .kpi, .card, .modal-card, .user-chip, .toast, .demo-banner{
+      background:rgba(20,31,50,.6);
+      -webkit-backdrop-filter:blur(18px) saturate(150%);
+      backdrop-filter:blur(18px) saturate(150%);
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 10px 34px rgba(2,6,17,.38);
+    }
+    .login-card{border-color:rgba(201,162,39,.4);}
+    .topbar{background:rgba(9,17,32,.72); border-bottom:1px solid rgba(201,162,39,.35); box-shadow:0 6px 24px rgba(2,6,17,.45);}
+    #loginView{
+      background:linear-gradient(135deg, var(--login1) 0%, var(--login2) 55%, var(--login3) 130%);
+    }
+    @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+      .login-card, .topbar, .filterbar, .kpi, .card, .modal-card, .user-chip, .toast, .demo-banner{background:rgba(18,27,44,.97);}
+    }
+
+    /* dhalo (glass) - light + kontrast sare */
+    body.light #loginView{background:linear-gradient(135deg, var(--login1) 0%, var(--login2) 55%, var(--login3) 130%);}
+    body.light .login-card, body.light .topbar, body.light .filterbar, body.light .kpi, body.light .card, body.light .modal-card, body.light .user-chip, body.light .toast, body.light .demo-banner{
+      background:rgba(255,253,246,.68);
+      border-color:rgba(31,39,51,.16);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 10px 30px rgba(31,39,51,.10);
+    }
+    body.light .login-card{border-color:rgba(201,162,39,.5);}
+    body.light .topbar{background:rgba(242,236,220,.82); border-bottom:1px solid rgba(201,162,39,.4);}
+    @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+      body.light .login-card, body.light .topbar, body.light .filterbar, body.light .kpi, body.light .card, body.light .modal-card, body.light .user-chip, body.light .toast, body.light .demo-banner{background:rgba(255,253,246,.98);}
+    }
+    body.light .bg i{opacity:.55;}
+
+    /* qoraal cad oo la arki karo (light) */
+    body.light .kpi .lbl, body.light .an-card .lbl, body.light thead th, body.light .filterbar label{color:#3f4a5a;}
+    body.light .kpi .sub, body.light .an-card .sub, body.light .card .hint, body.light .login-foot, body.light .brand .t2, body.light .user-chip .rl, body.light .empty, body.light .login-card p.sub{color:#59636f;}
+    body.light .pos{color:#15803d;}
+    body.light .neg{color:#dc2626;}
+    body.light .btn-outline, body.light .btn-ghost{color:#1d2733; border-color:#b9ae8d;}
+    body.light .btn-outline:hover, body.light .btn-ghost:hover{background:#ece4cf;}
+    body.light .pill{background:#e8e0c8; color:#5b5240;}
+    body.light .prog{background:#ddd3b6;}
+    body.light .calc-box{background:#f7f2e4; border-color:#e0d8bf; color:#4b5563;}
+    body.light .scan-text{background:#fff; border-color:#d8cfb4; color:#4b5563;}
+    body.light .login-err{background:#fde8e8; color:#b91c1c; border-color:#f5b5b5;}
+    body.light .period-chip{color:#8a6d1a; background:#f7f2e4; border-color:rgba(201,162,39,.5);}
+    body.light .receipt-box .row .k{color:#59636f;}
+    body.light .modal-x{color:#6a726e;}
+    body.light .modal-x:hover{color:#1d2733;}
+    body.light .brand .logo, body.light .login-logo{box-shadow:0 8px 20px rgba(201,162,39,.35);}
+
+    /* ============================================================
+       v3 - THEMES (3 naqshad cusub + Classic)
+       ============================================================ */
+    .theme-row{display:flex; gap:8px; flex-wrap:wrap;}
+    .theme-opt{display:flex; align-items:center; gap:8px; padding:8px 12px; border:2px solid var(--line); border-radius:12px; cursor:pointer; background:var(--soft); font-size:12px; font-weight:600; color:var(--ink); font-family:'Inter',sans-serif;}
+    .theme-opt:hover{border-color:var(--gold);}
+    .theme-opt.sel{border-color:var(--gold2); box-shadow:0 0 0 2px rgba(201,162,39,.25);}
+    .theme-opt .dots{display:flex;}
+    .theme-opt .dots i{width:15px; height:15px; border-radius:50%; border:1px solid rgba(255,255,255,.4); margin-left:-4px;}
+    .theme-opt .dots i:first-child{margin-left:0;}
+
+    /* ---- Theme: Slate (Teal/Cagaar-madow) ---- */
+    body[data-theme="slate"]{
+      --accent:#3B4F52; --accent2:#5C786E; --accent-d:#2C3E40; --accent-l:#7FA39B;
+      --blob1:rgba(92,120,110,.75); --blob2:rgba(59,79,82,.85); --blob3:rgba(115,142,87,.45); --blob4:rgba(87,113,70,.42); --blob5:rgba(59,78,63,.45);
+      --login1:rgba(22,32,34,.92); --login2:rgba(38,52,54,.88); --login3:rgba(92,120,110,.8);
+    }
+    body.light[data-theme="slate"]{
+      --blob1:rgba(92,120,110,.5); --blob2:rgba(59,79,82,.4); --blob3:rgba(201,162,39,.5); --blob4:rgba(110,155,147,.45); --blob5:rgba(84,120,110,.35);
+      --login1:rgba(222,230,224,.95); --login2:rgba(236,241,235,.93); --login3:rgba(190,208,198,.93);
+    }
+
+    /* ---- Theme: Olive (Cagaar) ---- */
+    body[data-theme="olive"]{
+      --accent:#577146; --accent2:#738E57; --accent-d:#3E512F; --accent-l:#9DB97E;
+      --blob1:rgba(115,142,87,.75); --blob2:rgba(87,113,70,.85); --blob3:rgba(59,79,82,.45); --blob4:rgba(148,173,119,.4); --blob5:rgba(85,63,51,.42);
+      --login1:rgba(24,32,18,.92); --login2:rgba(40,52,30,.88); --login3:rgba(115,142,87,.82);
+    }
+    body.light[data-theme="olive"]{
+      --blob1:rgba(115,142,87,.5); --blob2:rgba(87,113,70,.42); --blob3:rgba(201,162,39,.5); --blob4:rgba(148,173,119,.45); --blob5:rgba(84,120,110,.35);
+      --login1:rgba(235,240,228,.95); --login2:rgba(243,246,237,.93); --login3:rgba(205,216,190,.93);
+    }
+
+    /* ---- Theme: Terra (Bunni) ---- */
+    body[data-theme="terra"]{
+      --accent:#3B4E3F; --accent2:#553F33; --accent-d:#2A372C; --accent-l:#8A6A50;
+      --blob1:rgba(85,63,51,.78); --blob2:rgba(59,78,63,.85); --blob3:rgba(115,142,87,.42); --blob4:rgba(87,113,70,.4); --blob5:rgba(59,79,82,.45);
+      --login1:rgba(26,22,18,.92); --login2:rgba(40,34,27,.88); --login3:rgba(85,63,51,.82);
+    }
+    body[data-theme="terra"] .btn-primary{border:1px solid rgba(227,197,104,.4);}
+    body.light[data-theme="terra"]{
+      --blob1:rgba(85,63,51,.5); --blob2:rgba(59,78,63,.42); --blob3:rgba(201,162,39,.5); --blob4:rgba(156,122,90,.45); --blob5:rgba(110,90,70,.35);
+      --login1:rgba(240,235,226,.95); --login2:rgba(246,242,234,.93); --login3:rgba(222,208,190,.93);
+    }
+    /* ---- AI Chat panel ---- */
+    .chat-panel{position:fixed;right:0;top:0;width:380px;max-width:100vw;height:100vh;background:var(--card);border-left:1px solid var(--line);z-index:9999;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(0,0,0,.25);}
+    .chat-panel.hidden{display:none;}
+    .chat-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+    .chat-header h3{margin:0;font-size:14px;color:var(--ink);}
+    .chat-body{flex:1;overflow-y:auto;padding:12px;}
+    .chat-msg{margin-bottom:10px;padding:10px 14px;border-radius:12px;max-width:85%;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;}
+    .chat-msg.user{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+    .chat-msg.ai{background:var(--card2);color:var(--ink);border-bottom-left-radius:4px;}
+    .chat-input-area{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px;}
+    .chat-input-area input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;}
+    .chat-input-area input:focus{border-color:var(--accent2);}
+    .chat-input-area button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;}
+    .chat-fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:20px;cursor:pointer;z-index:9998;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+    .chat-fab:hover{background:var(--accent2);}
+    @media(max-width:640px){.chat-panel{width:100%;}}
+  </style>
+</head>
+<body>
+
+<!-- Liquid glass background (Apple-style) -->
+<div class="bg"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b5"></i></div>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="login-logo" id="loginLogo" style="font-family: &quot;PingFang SC&quot;, &quot;Hiragino Sans GB&quot;, &quot;Microsoft YaHei&quot;, sans-serif;">HH</div>
+    <h1 id="loginTitle">Happy Home</h1>
+    <p class="sub">Dashboard Maalgelinta &amp; Maamulka</p>
+    <div class="login-err" id="loginErr"></div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" autocomplete="username" placeholder="tusaale: admin">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Soo Gal (Login)</button>
+    <p class="login-foot">Nidaamka Happy Home - Apps Script Dashboard</p>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashView" class="hidden">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" id="brandLogo">HH</div>
+      <div>
+        <div class="t1" id="brandName">Happy Home</div>
+        <div class="t2">Dashboard Maalgelinta</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="act-btns">
+      <button class="btn btn-sm btn-outline" id="btnExport" onclick="exportCSV()">📥 Export</button>
+      <button class="btn btn-sm btn-outline" id="btnPrint" onclick="printDashboard()">🖨️ Print</button>
+      <button class="btn btn-sm btn-outline" id="btnTheme" onclick="toggleTheme()" title="Dark / Light (habeen / maalin)">☀️</button>
+      <button class="btn btn-sm btn-green" id="btnSale" onclick="openSale()">➕ Geli Iib</button>
+      <button class="btn btn-sm btn-amber" id="btnExp" onclick="openExp()">➕ Geli Kharash</button>
+      <button class="btn btn-sm btn-outline" id="btnPurch" onclick="openPurch()">📦 Geli Dalab</button>
+      <button class="btn btn-sm btn-blue" id="btnReceipt" onclick="openReceipt()">🧾 Receipt</button>
+      <button class="btn btn-sm btn-outline" id="btnCust" onclick="openCust()">🔍 Macmiil</button>
+      <button class="btn btn-sm btn-outline" id="btnSettings" onclick="openSettings()">⚙️ Settings</button>
+    </div>
+    <div class="user-chip">
+      <div class="avatar" id="avatar">A</div>
+      <div>
+        <div class="nm" id="userName">-</div>
+        <div class="rl" id="userRole">-</div>
+      </div>
+      <span class="badge" id="roleBadge">Admin</span>
+    </div>
+    <button class="btn btn-ghost" onclick="doLogout()">Bax</button>
+  </div>
+
+  <div class="wrap">
+    <div class="demo-banner" id="demoBanner">🔍 Tijaabo (Demo): waxaad ku fiirinaysaa xog tijaabo ah. Login-ka dhabta ah (admin/admin123) wuxuu shaqeeyaa kadib marka nidaamka lagu rakibo Google Sheets.</div>
+
+    <div class="filterbar">
+      <div class="f">
+        <label>Sanad</label>
+        <select id="fYear"></select>
+      </div>
+      <div class="f">
+        <label>Bil</label>
+        <select id="fMonth"></select>
+      </div>
+      <div class="f">
+        <label>Maalin</label>
+        <select id="fDay"></select>
+      </div>
+      <button class="btn btn-primary" id="applyBtn" onclick="applyFilter()">🔍 Eeg</button>
+      <button class="btn btn-ghost" onclick="resetFilter()">↻ Sifaynta</button>
+      <div class="period-chip" id="periodChip">-</div>
+    </div>
+
+    <!-- KPI row 1 -->
+    <div class="kpis">
+      <div class="kpi green">
+        <div class="ico">💰</div>
+        <div class="lbl">Iibka (Completed)</div>
+        <div class="val" id="kSales">$0</div>
+        <div class="sub" id="kSalesSub">-</div>
+      </div>
+      <div class="kpi red">
+        <div class="ico">💵</div>
+        <div class="lbl">Kharashka</div>
+        <div class="val" id="kExp">$0</div>
+        <div class="sub" id="kExpSub">-</div>
+      </div>
+      <div class="kpi blue">
+        <div class="ico">📈</div>
+        <div class="lbl">Faa'iidada (Iib - Kharash)</div>
+        <div class="val" id="kNet">$0</div>
+        <div class="sub" id="kNetSub">-</div>
+      </div>
+      <div class="kpi amber">
+        <div class="ico">📝</div>
+        <div class="lbl">Dalabka (Orders)</div>
+        <div class="val" id="kOrders">0</div>
+        <div class="sub" id="kOrdersSub">-</div>
+      </div>
+      <div class="kpi purple">
+        <div class="ico">🎯</div>
+        <div class="lbl">Yoolka</div>
+        <div class="val" id="kTarget">-</div>
+        <div class="sub" id="kTargetSub">-</div>
+      </div>
+    </div>
+
+    <!-- Analysis row -->
+    <div class="kpis">
+      <div class="kpi cyan an-card">
+        <div class="ico">👥</div>
+        <div class="inf"><div class="lbl">Wadarta Macaamiisha</div><div class="val" id="aCustomers">0</div><div class="sub" id="aCustomersSub">-</div></div>
+      </div>
+      <div class="kpi pink an-card">
+        <div class="ico">🛒</div>
+        <div class="inf"><div class="lbl">Dalabyada Dhammaystay</div><div class="val" id="aOrders">0</div><div class="sub" id="aOrdersSub">-</div></div>
+      </div>
+      <div class="kpi red an-card">
+        <div class="ico">💳</div>
+        <div class="inf"><div class="lbl">Deyn Harsan</div><div class="val neg" id="aDebt">$0</div><div class="sub" id="aDebtSub">-</div></div>
+      </div>
+      <div class="kpi amber an-card">
+        <div class="ico">🏆</div>
+        <div class="inf"><div class="lbl">Iibiyaaha Ugu Fiican</div><div class="val" id="aBestPerson">-</div><div class="sub" id="aBestPersonSub">-</div></div>
+      </div>
+      <div class="kpi green an-card">
+        <div class="ico">📍</div>
+        <div class="inf"><div class="lbl">Degmada Ugu Fiican</div><div class="val" id="aBestDistrict">-</div><div class="sub" id="aBestDistrictSub">-</div></div>
+      </div>
+      <div class="kpi purple an-card">
+        <div class="ico">🔥</div>
+        <div class="inf"><div class="lbl">Bisha Ugu Sareysa</div><div class="val" id="aBestMonth">-</div><div class="sub" id="aBestMonthSub">-</div></div>
+      </div>
+      <div class="kpi blue an-card">
+        <div class="ico">🏷️</div>
+        <div class="inf"><div class="lbl">Discount Guud</div><div class="val" id="aDiscount">$0</div><div class="sub" id="aDiscountSub">-</div></div>
+      </div>
+      <div class="kpi pink an-card">
+        <div class="ico">🚚</div>
+        <div class="inf"><div class="lbl">Delivery Bishan</div><div class="val" id="aDelivery">$0</div><div class="sub" id="aDeliverySub">-</div></div>
+      </div>
+      <div class="kpi purple an-card">
+        <div class="ico">🎖️</div>
+        <div class="inf"><div class="lbl">Target La Gaaray</div><div class="val" id="aTargets">-</div><div class="sub" id="aTargetsSub">-</div></div>
+      </div>
+      <div class="kpi green an-card">
+        <div class="ico">🎯</div>
+        <div class="inf"><div class="lbl">Target-ka Maanta</div><div class="val" id="aTodayVal">-</div><div class="sub" id="aTodaySub">-</div>
+        <div class="prog"><div class="fill" id="aTodayBar" style="width:0%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card span8">
+        <h3 id="mainChartTitle">Iibka vs Kharashka</h3>
+        <div class="hint" id="mainChartHint">-</div>
+        <div class="chartbox"><canvas id="mainChart"></canvas></div>
+      </div>
+      <div class="card span4">
+        <h3>Kharashka - Qaybaha</h3>
+        <div class="hint">Ugu weyn ilaa ugu yar</div>
+        <div class="chartbox"><canvas id="catChart"></canvas></div>
+      </div>
+      <div class="card span6">
+        <h3 id="targetChartTitle">Target-ka Bisha - Bilo</h3>
+        <div class="hint">Cagaar = la gaadhay • Oranji = ka hooseeya</div>
+        <div class="chartbox short"><canvas id="targetChart"></canvas></div>
+      </div>
+      <div class="card span6">
+        <h3>Iibka &amp; Discount-ka - Iibiyayaasha</h3>
+        <div class="hint">Buluug = iibka • Casaan = discount-ka (labadaba waa la arkaa)</div>
+        <div class="chartbox short"><canvas id="personChart"></canvas></div>
+      </div>
+      <div class="card span6">
+        <h3 id="profitChartTitle">Faa'iidada - Bishii</h3>
+        <div class="hint" id="profitChartHint">Cagaar = faa'iido • Casaan = khasaaro</div>
+        <div class="chartbox short"><canvas id="profitChart"></canvas></div>
+      </div>
+      <div class="card span6">
+        <h3>Iibka - Degmooyinka</h3>
+        <div class="hint">Xagee laga iibin badan yahay?</div>
+        <div class="chartbox short"><canvas id="distChart"></canvas></div>
+      </div>
+      <div class="card span4">
+        <h3>Macmiisha - Cusub vs Soo Noqday</h3>
+        <div class="hint">Kala qaybinta macmiisha</div>
+        <div class="chartbox short"><canvas id="typeChart"></canvas></div>
+      </div>
+      <div class="card span4">
+        <h3>Macmiisha Ugu Waaweyn</h3>
+        <div class="hint">5-ka ugu iibin badan</div>
+        <div class="chartbox short"><canvas id="topChart"></canvas></div>
+      </div>
+      <div class="card span4">
+        <h3>Iibiyayaasha - Tirooyinka</h3>
+        <div class="hint">Iibka, dalabyada iyo discount-ka</div>
+        <div class="tbl-scroll" style="max-height:230px; overflow-y:auto;">
+          <table><thead><tr><th>Iibiyaha</th><th>Iibka</th><th>Dalab</th><th>Disc</th></tr></thead>
+          <tbody id="spTableBody"><tr><td colspan="4" class="empty">Ma jiro xog</td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="card span6">
+        <h3>Iibkii Ugu Dambeeyay</h3>
+        <div class="hint">10-ka iib ee ugu cusub</div>
+        <div class="tbl-scroll"><div id="recentSalesBox"><div class="empty">Ma jiro xog</div></div></div>
+      </div>
+      <div class="card span6">
+        <h3>📅 Maalmaha Ugu Ganacsiga Badan</h3>
+        <div class="hint" id="weekdayHint">Iibka, Dalabyada &amp; Kharashka — maalin kasta oo usbuuca</div>
+        <div class="chartbox short"><canvas id="weekdayChart"></canvas></div>
+      </div>
+      <div class="card span6">
+        <h3>Kharashyadii Ugu Dambeeyay</h3>
+        <div class="hint">8-ka kharash ee ugu cusub</div>
+        <div class="tbl-scroll"><div id="recentExpBox"><div class="empty">Ma jiro xog</div></div></div>
+      </div>
+    </div>
+
+    <!-- ================= DALABAADKA DIBADDA — OVERSEAS ORDERS ================= -->
+    <div class="ov-panel">
+      <div class="ov-head">
+        <h2>📦 Dalabaadka Dibadda — Overseas Orders</h2>
+        <button class="btn btn-amber" id="btnPurchNew" onclick="openPurch()">➕ Dalab Cusub — New Order</button>
+      </div>
+
+      <div class="ov-summary">
+        <div class="ov-tile amber">
+          <div class="ov-ico">🚚</div>
+          <div><div class="ov-num" id="pPendingCount">0</div>
+            <div class="ov-lbl">Pending Orders — Dalabaad Sugaya</div>
+            <div class="ov-sub" id="pPendingTotal">$0.00</div></div>
+        </div>
+        <div class="ov-tile green">
+          <div class="ov-ico">📦</div>
+          <div><div class="ov-num" id="pReceivedCount">0</div>
+            <div class="ov-lbl">Received Orders — La Heshay</div>
+            <div class="ov-sub" id="pCargoTotal">Cargo+Kharash Sanadka: $0.00</div></div>
+        </div>
+      </div>
+
+      <div class="ov-tabs">
+        <button class="ov-tab active" data-tab="all" onclick="setOrdersTab('all')">All</button>
+        <button class="ov-tab" data-tab="pending" onclick="setOrdersTab('pending')">Pending</button>
+        <button class="ov-tab" data-tab="received" onclick="setOrdersTab('received')">Received</button>
+        <button class="ov-tab" data-tab="cancelled" onclick="setOrdersTab('cancelled')">Cancelled</button>
+      </div>
+
+      <div class="tbl-scroll"><div id="ordersBox"><div class="empty">Ma jiro dalab weli</div></div></div>
+
+      <div class="grid" style="margin-top:16px">
+        <div class="card span6">
+          <h3>Alaabta La Dalbaday - Bishii</h3>
+          <div class="hint">Lacagta la dalbaday, bil kasta (xisaabinta bisha dalabka)</div>
+          <div class="chartbox short"><canvas id="purchChart"></canvas></div>
+        </div>
+        <div class="card span6">
+          <h3>Cargo + Kharashaad Kale - Bishii</h3>
+          <div class="hint">Cargo/kharash, bil kasta (xisaabinta bisha imaatinka)</div>
+          <div class="chartbox short"><canvas id="cargoChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: GELI IIB ================= -->
+<div class="modal-overlay hidden" id="saleModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>➕ Geli Iib Cusub</h3><button class="modal-x" onclick="closeModal('saleModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>Taariikh *</label><input type="date" id="sDate"></div>
+        <div class="field"><label>Macmiilka *</label><input type="text" id="sCustomer" placeholder="Magaca macmiilka"></div>
+        <div class="field"><label>Paper Invoice No.</label><input type="text" id="sPaper" placeholder="Tusaale: INV-001"></div>
+        <div class="field"><label>Telefoonka</label><input type="text" id="sPhone" placeholder="061xxxxxxx"></div>
+        <div class="field"><label>Degmada *</label><select id="sDistrict" onchange="toggleNewDist()"></select></div>
+        <div class="field full" id="sNewDistWrap" style="display:none"><label>Degmo / Magaalo / Xaafad cusub</label><input type="text" id="sNewDist" placeholder="tusaale: Heliwaa"></div>
+        <div class="field"><label>Nooca Macmiilka</label><select id="sType"><option>Tafariq (Retail)</option><option>Jumlo (Wholesale)</option><option>New</option><option>Returning</option></select></div>
+        <div class="field"><label>Iibiyaha *</label><select id="sPerson" onchange="togglePerson()"></select></div>
+        <div class="field" id="sNewPersonWrap" style="display:none"><label>Iibiyaha Cusub *</label><input type="text" id="sNewPerson" placeholder="Magaca qofka iibiyaha"></div>
+        <div class="field"><label>Habka Lacagta</label><select id="sPayMethod"><option>Cash</option><option>EVC Plus</option><option>Bank</option><option>Card</option><option>Credit</option></select></div>
+        <div class="field"><label>Heerka</label><select id="sStatus"><option>Completed</option><option>Pending</option></select></div>
+        <div class="field"><label>Iibka Guud ($) *</label><input type="number" id="sGross" min="0" step="0.01" placeholder="0.00" oninput="recalcSale()"></div>
+        <div class="field"><label>Nooca Discount</label><select id="sDiscType" onchange="toggleDisc(); recalcSale()"><option>None</option><option>Percent</option><option>Amount ($)</option></select></div>
+        <div class="field" id="sDiscInputWrap" style="display:none"><label>Qiimaha Discount</label><input type="number" id="sDiscInput" min="0" step="0.01" placeholder="0" oninput="recalcSale()"></div>
+        <div class="field"><label>Lacagta Hore</label><input type="number" id="sInitial" min="0" step="0.01" placeholder="0.00" oninput="recalcSale()"></div>
+        <div class="field full"><label>Xisaabinta - toos u shaqeysa</label><div class="calc-box" id="sCalcBox">Iibka: $0.00 • Discount: $0.00 • Net: $0.00 • Hore: $0.00 • Harteed (Rest): $0.00</div></div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <button class="btn btn-sm btn-blue" onclick="toggleScan()">📷 Scan Sawirka (OCR)</button>
+        <div id="scanWrap" class="hidden" style="margin-top:10px">
+          <input type="file" id="scanFile" accept="image/*" onchange="scanFile()">
+          <div id="scanStatus" class="hint" style="margin-top:8px">Dooro sawirka receipt-ka - wuxuu foomka si fudud u buuxinayaa, kadibna hubi oo kaydi.</div>
+          <img id="scanPreview" class="hidden" style="max-height:160px; border-radius:10px; margin-top:8px; border:1px solid var(--line)">
+          <div id="scanText" class="scan-text hidden"></div>
+          <button class="btn btn-sm btn-green" onclick="fillFromScan()" style="margin-top:8px">Buuxi Foomka</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('saleModal')">Joji</button>
+      <button class="btn btn-primary" id="saleSaveBtn" onclick="submitSale()" style="width:auto">💾 Kaydi Iibka</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: GELI KHARASH ================= -->
+<div class="modal-overlay hidden" id="expModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>➕ Geli Kharash</h3><button class="modal-x" onclick="closeModal('expModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>Taariikh *</label><input type="date" id="eDate"></div>
+        <div class="field"><label>Qaybta *</label><select id="eCat" onchange="toggleCat()"><option>Kirada</option><option>Shaqaalaha</option><option>Gaadiidka</option><option>Korontada</option><option>Xayeysiiska</option><option>Qalabka</option><option>Office Supplies</option><option>Cashuur</option><option>Other</option></select></div>
+        <div class="field full" id="eNewCatWrap" style="display:none"><label>Qaybta Cusub (Other)</label><input type="text" id="eNewCat" placeholder="Magaca qaybta"></div>
+        <div class="field full"><label>Sharaxaad</label><input type="text" id="eDesc" placeholder="Waxa uu yahay kharashku"></div>
+        <div class="field"><label>Qadarka ($) *</label><input type="number" id="eAmount" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>Bixiyaha / Qofka</label><input type="text" id="ePaidBy" placeholder="Magaca qofka ee lacagta bixiyay"></div>
+        <div class="field"><label>Habka Lacagta</label><select id="ePayMethod"><option>Cash</option><option>EVC Plus</option><option>Bank</option><option>Card</option></select></div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <button class="btn btn-sm btn-blue" onclick="toggleExpScan()">📷 Scan Rasiidhka (AI)</button>
+        <div id="expScanWrap" class="hidden" style="margin-top:10px">
+          <input type="file" id="expScanFile" accept="image/*" capture="environment" onchange="scanExpFile()">
+          <div id="expScanStatus" class="hint" style="margin-top:8px">Dooro sawirka rasiidhka kharashaadka — wuxuu foomka si fudud u buuxinayaa, kadibna hubi oo kaydi.</div>
+          <img id="expScanPreview" class="hidden" style="max-height:160px; border-radius:10px; margin-top:8px; border:1px solid var(--line)">
+          <div id="expScanText" class="scan-text hidden"></div>
+          <button class="btn btn-sm btn-green" onclick="fillExpFromScan()" style="margin-top:8px">Buuxi Foomka</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('expModal')">Joji</button>
+      <button class="btn btn-primary" id="expSaveBtn" onclick="submitExp()" style="width:auto">💾 Kaydi Kharashka</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: DALAB CUSUB (MULTI-ITEM) ================= -->
+<div class="modal-overlay hidden" id="purchModal">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-head"><h3>📦 Dalab Cusub — New Order</h3><button class="modal-x" onclick="closeModal('purchModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="hint" style="margin-bottom:10px">Cargo iyo kharashaadka kale lagama gelayo halkan — waxaad geli doontaa marka alaabtu timaado (Receive).</div>
+      <div class="form-grid">
+        <div class="field"><label>Order Date — Taariikhda *</label><input type="date" id="pDate"></div>
+        <div class="field"><label>Supplier — Soo Gudbiye</label><input type="text" id="pSupplier" placeholder="tusaale: Alibaba - Guangzhou"></div>
+        <div class="field full"><label>Notes</label><input type="text" id="pNotes" placeholder=""></div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:8px;">Items — Alaabaha</label>
+        <div id="itemRows"></div>
+        <button class="btn btn-sm btn-outline" onclick="addItemRow()" type="button">+ Add Item</button>
+      </div>
+      <div style="text-align:right; margin-top:10px; font-weight:700; color:var(--gold2);">Total: <span id="pGrandTotal">$0.00</span></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('purchModal')">Joji</button>
+      <button class="btn btn-primary" id="purchSaveBtn" onclick="submitPurch()" style="width:auto">💾 Create Order — Abuur Dalabaad</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: RECEIVE ORDER (CARGO + OTHER COSTS) ================= -->
+<div class="modal-overlay hidden" id="receivedModal">
+  <div class="modal-card" style="max-width:520px">
+    <div class="modal-head"><h3>✅ Receive Order — La Hel Dalabaad</h3><button class="modal-x" onclick="closeModal('receivedModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="receipt-box" style="margin-bottom:14px">
+        <div class="row"><span class="k">Order</span><span class="v" id="receivedOrderId">-</span></div>
+        <div id="receivedItemsList"></div>
+        <div class="row total"><span class="k">Total</span><span class="v" id="receivedOrderTotal">-</span></div>
+      </div>
+      <div class="login-err show" style="background:#2a2410; color:#f5d67a; border-color:#7a5f14; margin-bottom:14px;">
+        ⚠️ These costs will be proportionally added to each product's cost price — Lacagtan si tafaariiq ah ayaa loogu darayaa qiimaha alaabta.
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Cargo Cost — Lacag Gaadhin ($)</label><input type="number" id="rCargo" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>Other Costs — Kharashaad Kale ($)</label><input type="number" id="rOther" min="0" step="0.01" placeholder="0.00"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('receivedModal')">Joji</button>
+      <button class="btn btn-green" id="receivedSaveBtn" onclick="submitReceived()" style="width:auto">✓ Confirm Received — Xaqiiji La Heshay</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: RECEIPT ================= -->
+<div class="modal-overlay hidden" id="receiptModal">
+  <div class="modal-card wide">
+    <div class="modal-head"><h3>🧾 Receipt / Qaan-qaad</h3><button class="modal-x" onclick="closeModal('receiptModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field full"><label>System Invoice ID ama Paper Invoice No.</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="rInvoice" placeholder="tusaale: INV-20260815-1234" style="flex:1">
+            <button class="btn btn-primary" onclick="findReceipt()" style="width:auto">Raadi</button>
+          </div>
+        </div>
+      </div>
+      <div class="result-box hidden" id="receiptWrap">
+        <div class="receipt-box" id="receiptBody"></div>
+      </div>
+      <div class="result-box hidden" id="receiptErr" style="color:#f87171; font-size:13px;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('receiptModal')">Joji</button>
+      <button class="btn btn-blue" onclick="printReceipt()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: MACMIIL SEARCH ================= -->
+<div class="modal-overlay hidden" id="custModal">
+  <div class="modal-card wide">
+    <div class="modal-head"><h3>🔍 Raadi Macmiil</h3><button class="modal-x" onclick="closeModal('custModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Telefoonka ama Magaca Macmiilka</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="cQuery" placeholder="tusaale: 061xxxxxxx ama Halima" style="flex:1">
+          <button class="btn btn-primary" onclick="findCustomer()" style="width:auto">Raadi</button>
+        </div>
+      </div>
+      <div class="result-box hidden" id="custResults"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('custModal')">Joji</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: SETTINGS ================= -->
+<div class="modal-overlay hidden" id="settingsModal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>⚙️ Settings - Maamulka</h3><button class="modal-x" onclick="closeModal('settingsModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Naqshadda (Theme) — 3 ikhtiyaar + Classic</label><div class="theme-row" id="themeRow"></div></div>
+      <div class="field"><label>Magaca Ganacsiga</label><input type="text" id="bizNameInput" placeholder="Happy Home"></div>
+      <div class="field"><label>Macluumaadka Ganacsiga (ciwaan, tel., email)</label><input type="text" id="bizInfoInput" placeholder="Mogadishu, Hodan — Tel: 0612345678"></div>
+      <div class="field">
+        <label>Logo Ganacsiga (96×96 - PNG/JPG)</label>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <input type="file" id="logoFile" accept="image/*" onchange="readLogoFile()">
+          <button class="btn btn-sm btn-ghost" onclick="clearLogo()">🗑️ Ka Saar Logo</button>
+        </div>
+        <div style="margin-top:10px"><img id="logoPreview" class="hidden" style="width:64px;height:64px;border-radius:14px;border:1px solid var(--line); background:#fff; object-fit:cover;"></div>
+      </div>
+      <div class="field"><button class="btn btn-primary" onclick="saveSettings()" style="width:auto">💾 Kaydi Settings</button></div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:16px 0;">
+      <div style="font-size:14px; font-weight:700; font-family:'Playfair Display',serif; color:var(--gold2); margin-bottom:12px;">🤖 Scan Invoice - Gemini API Key</div>
+      <div class="hint" style="margin-bottom:10px">Si scan-ku heersare ugu shaqeeyo (uu aqoonsado qoraalka gacanta), waxaad u baahan tahay Gemini API Key (bilaash). Hel: <b>aistudio.google.com/apikey</b></div>
+      <div class="form-grid">
+        <div class="field full"><label>Gemini API Key</label><input type="password" id="geminiKeyInput" placeholder="AIza..."></div>
+      </div>
+      <div class="field"><button class="btn btn-blue" onclick="saveGeminiKeyUI()" style="width:auto">💾 Kaydi API Key</button> <span id="geminiKeyStatus" class="hint"></span></div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:16px 0;">
+      <div style="font-size:14px; font-weight:700; font-family:'Playfair Display',serif; color:var(--gold2); margin-bottom:12px;">🔑 Badalka Password-ka</div>
+      <div class="form-grid">
+        <div class="field"><label>Password-ka Hadda</label><input type="password" id="pOld" autocomplete="current-password"></div>
+        <div class="field"><label>Password Cusub (≥5 xaraf)</label><input type="password" id="pNew" autocomplete="new-password"></div>
+      </div>
+      <div class="field"><button class="btn btn-blue" onclick="changePassword()" style="width:auto">🔑 Badal Password</button></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('settingsModal')">Joji</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Vercel Adapter =================
+   Marka app-ku Vercel (ama host kale oo http/https) lagu maamulo, google.script.run ma jiro.
+   Adapter-kan wuxuu abuuraa interface la isku ehek call-yada oo dhan, wuuna u diraa
+   /api/data (Vercel function) — taas oo u gudbisa Google Apps Script Web App (doPost JSON router).
+   Apps Script-ka dhabta ah: adapter-ku wuu fadhiistaa (native jiro).
+   file:// ama localhost: demo mode sida hore.
+   */
+(function(){
+  var nativeGAS = false;
+  try { nativeGAS = typeof google !== 'undefined' && google.script && google.script.run; } catch(e){}
+  if (nativeGAS) return;
+  var host = (location && location.hostname) || '';
+  var proto = (location && location.protocol) || '';
+  if (proto.indexOf('http') !== 0) return;
+  if (host === 'localhost' || host === '127.0.0.1') return;
+  if (host.indexOf('script.google') !== -1 || host.indexOf('googleusercontent') !== -1) return;
+
+  var API_METHODS = ['login','logout','whoAmI','getMeta','getData','addSale','addExpense','createOrder','receiveOrder','cancelOrder','getReceipt','searchCustomer','saveSettings','changePassword','saveGeminiKey','hasGeminiKey','scanInvoiceImage','scanExpenseImage','aiChat'];
+  function callGAS(method, args, success, failure){
+    fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ method: method, args: args || [] })
+    }).then(function(r){ return r.text(); }).then(function(t){
+      var j;
+      try { j = JSON.parse(t); } catch(e){ j = { ok:false, msg:'Backend-ka jawaab aan JSON ahayn wuu soo celinayay: ' + String(t).slice(0,120) }; }
+      if (success) success(j);
+    }).catch(function(e){ if (failure) failure(e); });
+  }
+  function makeRunner(success, failure){
+    var r = {};
+    API_METHODS.forEach(function(m){
+      r[m] = function(){ callGAS(m, Array.prototype.slice.call(arguments), success, failure); };
+    });
+    r.withSuccessHandler = function(fn){ return makeRunner(fn, failure); };
+    r.withFailureHandler = function(fn){ return makeRunner(success, fn); };
+    return r;
+  }
+  window.google = { script: { run: makeRunner(null, null) } };
+  window.__VERCEL_ADAPTER__ = true;
+})();
+
+/* ================= Helpers ================= */
+var MONTHS = ['Janaayo','Febraayo','Maarso','Abriil','Maajo','Juun','Luuliyo','Ogos','Sebteembar','Oktoobar','Noofeembar','Diseembar'];
+var DISTRICTS = ['Hodan','Warta Nabada','Kaxda','Wadajir','Hamar Weyne','Dharkenley','Karaan','Yaqshid','Waberi','Daynile','Shibis','Shangani','Abdiaziz','Bondhere','Hamar Jajab','Huriwa','Hawle Wadag','Kale'];
+var state = { token: null, user: null, meta: null, filter: { year: 0, month: 0, day: 0 } };
+var LIGHT = false;
+var scanResultData = null;
+var pendingLogo = '';
+var pendingTheme = '';
+var customDistricts = [];
+var THEMES = {
+  classic: { name:'Classic - Navy & Dahab', accent:'#1F4B84', accent2:'#2E6DB4', chart:'#2E6DB4', chart2:'#38bdf8', palette:['#1F4B84','#2E6DB4','#22c55e','#f59e0b','#a78bfa','#e83e6b'] },
+  slate:   { name:'Slate - Cagaar-Teal', accent:'#3B4F52', accent2:'#5C786E', chart:'#5C786E', chart2:'#7FA39B', palette:['#3B4F52','#5C786E','#738E57','#577146','#3B4E3F','#553F33'] },
+  olive:   { name:'Olive - Cagaar', accent:'#577146', accent2:'#738E57', chart:'#738E57', chart2:'#9DB97E', palette:['#577146','#738E57','#5C786E','#3B4F52','#3B4E3F','#553F33'] },
+  terra:   { name:'Terra - Bunni', accent:'#3B4E3F', accent2:'#553F33', chart:'#8A6A50', chart2:'#9C7A5A', palette:['#3B4E3F','#553F33','#5C786E','#738E57','#577146','#3B4F52'] }
+};
+function themeColor(key){
+  var t = THEMES[state.theme] || THEMES.classic;
+  return t[key] || t.chart;
+}
+
+/* ---- Logo-ga rasmiga ah (default) — logo-ga Happy Home (guri buluug) ---- */
+var LOGO_DATA = 'data:image/png;base64,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';
+function defaultLogo(){ return LOGO_DATA; }
+
+/* Kaydin ammaan ah (localStorage-ka waxaa laga xayiray Apps Script iframe-ka) */
+var store = (function(){
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return localStorage; }
+  catch(e){ var mem = {}; return {
+    getItem:function(k){ return (k in mem) ? mem[k] : null; },
+    setItem:function(k,v){ mem[k] = String(v); },
+    removeItem:function(k){ delete mem[k]; }
+  }; }
+})();
+
+/* ================= Demo mode (static preview only - Google Sheets-ka kuma shaqeeyo) ================= */
+function hasBackend(){
+  try { return typeof google !== 'undefined' && google.script && google.script.run; }
+  catch(e){ return false; }
+}
+var DEMO_MODE = !hasBackend();
+
+var DEMO_META = {
+  years: [2026, 2025],
+  dailyTarget: 500, monthlyTarget: 1000, profitRate: 0.3, currency: 'USD',
+  salespeople: ['Abdiqaliq','Saacid','Yusuf','Abdiwasic','Aisha'],
+  categories: ['Kirada','Shaqaalaha','Gaadiidka','Korontada','Xayeysiiska','Qalabka']
+};
+
+function drow(y,m,day,cust,phone,type,dist,person,pay,status,gross,disc,paid,deliv){
+  var net = Math.round((gross - disc)*100)/100;
+  deliv = Number(deliv) || 0;
+  return { date:new Date(y,m-1,day), invoiceId:'INV-'+y+('0'+m).slice(-2)+('0'+day).slice(-2)+'-'+Math.floor(Math.random()*9000+1000),
+    paper:'', customer:cust, phone:phone, custType:type, location:dist+' - Muqdisho', district:dist,
+    salesperson:person, payMethod:pay, payStatus: status==='Completed' ? 'Paid':'Pending',
+    gross:gross, discount:disc, net:net, totalPaid: status==='Completed' ? Math.min(paid,net):0,
+    balance: status==='Completed' ? Math.max(0, Math.round((net-Math.min(paid,net))*100)/100) : net,
+    status:status, completed: status === 'Completed', custDeliv:deliv, compDeliv:0 };
+}
+var DEMO_SALES = [
+  drow(2026,8,16,'Faadumo Cusmaan','601','New','Hodan','Abdiqaliq','Cash','Completed',520,20,520),
+  drow(2026,8,15,'Halima Axmed','602','New','Hodan','Abdiqaliq','Cash','Completed',360,10,360),
+  drow(2026,8,14,'Mohamed Cali','603','Returning','Warta Nabada','Saacid','EVC Plus','Completed',300,20,200),
+  drow(2026,8,13,'Amina Cabdi','604','New','Kaxda','Yusuf','Cash','Completed',200,10,200),
+  drow(2026,8,12,'Yusuf Xasan','605','New','Wadajir','Abdiwasic','EVC Plus','Completed',450,30,300),
+  drow(2026,8,11,'Fadumo Cumar','606','Returning','Hamar Weyne','Aisha','Cash','Completed',150,0,150),
+  drow(2026,8,10,'Cabdikariim Maxamed','607','New','Dharkenley','Abdiqaliq','Cash','Completed',300,0,300),
+  drow(2026,8,9,'Sahra Nuur','608','New','Hodan','Saacid','EVC Plus','Completed',240,20,160),
+  drow(2026,8,8,'Axmed Warsame','609','Returning','Kaxda','Yusuf','Cash','Completed',180,5,180),
+  drow(2026,8,7,'Maryan Cali','610','New','Warta Nabada','Abdiwasic','Bank','Completed',270,10,270),
+  drow(2026,8,6,'Xasan Guuleed','611','New','Wadajir','Aisha','Cash','Completed',100,5,0),
+  drow(2026,8,4,'Nuura Cali','612','New','Hodan','Abdiqaliq','EVC Plus','Pending',130,0,0),
+  drow(2026,7,28,'Halima Axmed','602','New','Hodan','Abdiqaliq','Cash','Completed',500,40,500),
+  drow(2026,6,10,'Ali Xaaji','613','Returning','Hodan','Saacid','Bank','Completed',850,50,850),
+  drow(2026,5,5,'Khadija Nuur','614','New','Waberi','Yusuf','Cash','Completed',620,0,620),
+  drow(2026,4,12,'Cabdi Bashiir','615','New','Karaan','Abdiwasic','EVC Plus','Completed',540,40,400),
+  drow(2026,3,20,'Saida Axmed','616','Returning','Hodan','Aisha','Cash','Completed',460,10,460),
+  drow(2026,2,8,'Maxamed Nuur','617','New','Kaxda','Abdiqaliq','Cash','Completed',700,60,700),
+  drow(2026,1,15,'Hodan Cilmi','618','New','Daynile','Saacid','Cash','Completed',380,0,380),
+  drow(2026,1,20,'Maryan Maxamuud','619','New','Hodan','Aisha','Bank','Completed',760,0,760),
+  drow(2026,2,25,'Cali Xirsi','620','Returning','Waberi','Abdiwasic','Cash','Completed',830,30,830),
+  drow(2026,3,28,'Sahro Cabdi','621','New','Kaxda','Abdiqaliq','EVC Plus','Completed',720,20,720),
+  drow(2026,4,30,'Maxamed Cali','603','Returning','Hodan','Saacid','Cash','Completed',690,0,690),
+  drow(2026,5,27,'Amina Cabdi','604','Returning','Warta Nabada','Yusuf','EVC Plus','Completed',750,50,750),
+  drow(2026,6,29,'Xasan Guuleed','611','New','Karaan','Aisha','Cash','Completed',880,0,880),
+  drow(2025,12,20,'Ali Xaaji','613','Returning','Hodan','Saacid','Bank','Completed',520,20,520)
+];
+/* Delivery-ka (gaadiidka) - tijaabo */
+var DEMO_DELIV = {'2026-8-16':60,'2026-8-15':40,'2026-8-13':30,'2026-8-12':50,'2026-8-10':45,'2026-8-8':25,'2026-8-7':30,'2026-7-28':55,'2026-6-10':70,'2026-5-5':40,'2026-4-12':35,'2026-3-20':30,'2026-2-8':50,'2026-1-15':25,'2026-1-20':60,'2026-2-25':45,'2026-3-28':40,'2026-5-27':35,'2026-6-29':65,'2025-12-20':30};
+for(var di=0; di<DEMO_SALES.length; di++){
+  var dk = DEMO_SALES[di].date.getFullYear()+'-'+(DEMO_SALES[di].date.getMonth()+1)+'-'+DEMO_SALES[di].date.getDate();
+  DEMO_SALES[di].custDeliv = DEMO_DELIV[dk] || 0;
+}
+var DEMO_EXP = [
+  {date:new Date(2026,7,14), category:'Kirada', description:'Kirada dukaanka', amount:600},
+  {date:new Date(2026,7,12), category:'Shaqaalaha', description:'Mushahar', amount:500},
+  {date:new Date(2026,7,10), category:'Gaadiidka', description:'Shidaal + gaadiid', amount:250},
+  {date:new Date(2026,7,8), category:'Korontada', description:'Bil Koronto', amount:180},
+  {date:new Date(2026,7,5), category:'Xayeysiiska', description:'Xayeysiis Facebook', amount:150},
+  {date:new Date(2026,7,3), category:'Qalabka', description:'Qalab cusub', amount:140},
+  {date:new Date(2026,7,1), category:'Gaadiidka', description:'Gaadiid alaab', amount:90},
+  {date:new Date(2026,6,30), category:'Korontada', description:'Bil Koronto', amount:170}
+];
+
+var DEMO_ORDERS = [
+  {id:'ORD-20260810-1001', date:new Date(2026,7,10), supplier:'Alibaba - Guangzhou', notes:'', status:'Received', receivedDate:new Date(2026,7,18), cargo:180, otherCosts:40,
+    items:[{product:'Sariiro (Beds)', qty:10, unitCost:120, total:1200}]},
+  {id:'ORD-20260815-1002', date:new Date(2026,7,15), supplier:'Alibaba - Guangzhou', notes:'', status:'Pending', receivedDate:null, cargo:0, otherCosts:0,
+    items:[{product:'Roobiga & Kuraas', qty:20, unitCost:45, total:900}]},
+  {id:'ORD-20260702-1003', date:new Date(2026,6,2), supplier:'Guangzhou Furniture Co', notes:'', status:'Received', receivedDate:new Date(2026,6,20), cargo:110, otherCosts:25,
+    items:[{product:'Miisas (Tables)', qty:8, unitCost:80, total:640}]},
+  {id:'ORD-20260605-1004', date:new Date(2026,5,5), supplier:'Home Decor Direct', notes:'', status:'Received', receivedDate:new Date(2026,5,22), cargo:95, otherCosts:20,
+    items:[{product:'Sitaar & Alaab Guriga', qty:30, unitCost:25, total:750}]},
+  {id:'ORD-20260512-1005', date:new Date(2026,4,12), supplier:'Home Decor Direct', notes:'', status:'Received', receivedDate:new Date(2026,4,28), cargo:60, otherCosts:15,
+    items:[{product:'Faanooska (Lamps)', qty:15, unitCost:26.67, total:400}]}
+];
+function demoOrderDays(d, recD, status){
+  var t=new Date(); t.setHours(0,0,0,0);
+  var o=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  if(String(status).toLowerCase()==='pending') return Math.max(0, Math.round((t-o)/86400000));
+  if(recD){ var r=new Date(recD.getFullYear(),recD.getMonth(),recD.getDate()); return Math.max(0, Math.round((r-o)/86400000)); }
+  return 0;
+}
+function demoOrderTotal(items){ var t=0; for(var i=0;i<items.length;i++) t+=items[i].total; return Math.round(t*100)/100; }
+function demoAddPurchase(f){
+  var d = new Date(Number(f.date.slice(0,4)), Number(f.date.slice(5,7))-1, Number(f.date.slice(8,10)));
+  var id = 'ORD-'+f.date.replace(/-/g,'')+'-'+Math.floor(Math.random()*9000+1000);
+  var items = (f.items||[]).filter(function(it){ return it.product && Number(it.qty)>0; })
+    .map(function(it){ return {product:it.product, qty:Number(it.qty)||0, unitCost:Number(it.unitCost)||0, total:Math.round((Number(it.qty)||0)*(Number(it.unitCost)||0)*100)/100}; });
+  if(!items.length) return {ok:false, msg:'Ugu yaraan hal alaab waa qasab.'};
+  DEMO_ORDERS.unshift({ id:id, date:d, supplier:f.supplier||'', notes:f.notes||'', status:'Pending', receivedDate:null, cargo:0, otherCosts:0, items:items });
+  return { ok:true, id:id, msg:'Dalabka waa la kaydiyay (demo): '+id };
+}
+function demoMarkReceived(id, cargo, otherCosts){
+  for(var i=0;i<DEMO_ORDERS.length;i++) if(DEMO_ORDERS[i].id===id){
+    DEMO_ORDERS[i].status='Received';
+    DEMO_ORDERS[i].receivedDate=new Date();
+    DEMO_ORDERS[i].cargo=Number(cargo)||0;
+    DEMO_ORDERS[i].otherCosts=Number(otherCosts)||0;
+    return {ok:true, msg:'Dalabka waa la xaqiijiyay in la heshay (demo).'};
+  }
+  return {ok:false, msg:'Lama helin.'};
+}
+function demoCancelOrder(id){
+  for(var i=0;i<DEMO_ORDERS.length;i++) if(DEMO_ORDERS[i].id===id){
+    DEMO_ORDERS[i].status='Cancelled';
+    return {ok:true, msg:'Dalabka waa la joojiyay (demo).'};
+  }
+  return {ok:false, msg:'Lama helin.'};
+}
+function inPeriod(d, f){
+  if(d.getFullYear() !== f.year) return false;
+  if(f.month > 0 && (d.getMonth()+1) !== f.month) return false;
+  if(f.day > 0 && d.getDate() !== f.day) return false;
+  return true;
+}
+function demoData(filter){
+  filter = filter || {};
+  var year = Number(filter.year) || 2026, month = Number(filter.month) || 0, day = Number(filter.day) || 0;
+  var i, sRows = [], eRows = [];
+  for(i=0;i<DEMO_SALES.length;i++) if(inPeriod(DEMO_SALES[i].date, {year:year,month:month,day:day})) sRows.push(DEMO_SALES[i]);
+  for(i=0;i<DEMO_EXP.length;i++) if(inPeriod(DEMO_EXP[i].date, {year:year,month:month,day:day})) eRows.push(DEMO_EXP[i]);
+  var totalS = 0, orders = 0, totalE = 0, pending = 0, debtTotal = 0, debtCust = {}, discountTotal = 0, discountOrders = 0, deliveryTotal = 0, deliveryOrders = 0;
+  var personInfo = {}, distMap = {}, typeMap = {New:0,Returning:0}, custMap = {}, newPh = {}, retPh = {};
+  for(i=0;i<sRows.length;i++){
+    var s = sRows[i];
+    if(!s.completed){ if(s.status === 'Pending') pending++; continue; }
+    totalS += s.net; orders++;
+    var pn = s.salesperson || '(aan la aqoon)';
+    if(!personInfo[pn]) personInfo[pn] = {sales:0,orders:0,discounts:0,discountAmt:0};
+    personInfo[pn].sales += s.net; personInfo[pn].orders++;
+    if(s.discount > 0){ personInfo[pn].discounts++; personInfo[pn].discountAmt += s.discount; discountTotal += s.discount; discountOrders++; }
+    distMap[s.district || '(aan la aqoon)'] = (distMap[s.district || '(aan la aqoon)'] || 0) + s.net;
+    var t = (s.custType || '').toLowerCase();
+    if(t.indexOf('return') !== -1){ typeMap.Returning += s.net; if(s.phone) retPh[s.phone] = 1; }
+    else { typeMap.New += s.net; if(s.phone) newPh[s.phone] = 1; }
+    if(s.customer) custMap[s.customer] = (custMap[s.customer] || 0) + s.net;
+    if(s.balance > 0){ debtTotal += s.balance; debtCust[s.customer] = 1; }
+    if(s.custDeliv > 0){ deliveryTotal += s.custDeliv; deliveryOrders++; }
+  }
+  for(i=0;i<eRows.length;i++) totalE += eRows[i].amount;
+  /* Cargo/xamali iyo lacagta alaabta la dalbaday gooni ayaa loo xisaabiyaa - kama qeyb qaataan Kharashka guud. */
+  var net = Math.round((totalS - totalE)*100)/100;
+  var catMap = {};
+  for(i=0;i<eRows.length;i++) catMap[eRows[i].category || 'Other'] = (catMap[eRows[i].category || 'Other'] || 0) + eRows[i].amount;
+  var salespeople = [];
+  for(var pk in personInfo) if(personInfo.hasOwnProperty(pk)){
+    var pi = personInfo[pk];
+    salespeople.push({label:pk, sales:Math.round(pi.sales*100)/100, orders:pi.orders, discounts:pi.discounts, discountAmt:Math.round(pi.discountAmt*100)/100});
+  }
+  salespeople.sort(function(a,b){ return b.sales - a.sales; });
+  function arr(map){ var out=[]; for(var k in map) if(map.hasOwnProperty(k)) out.push({label:k,value:Math.round(map[k]*100)/100}); out.sort(function(a,b){return b.value-a.value;}); return out; }
+  var byDiscount = [];
+  for(var k2 in personInfo) if(personInfo.hasOwnProperty(k2) && personInfo[k2].discountAmt > 0) byDiscount.push({label:k2, value:Math.round(personInfo[k2].discountAmt*100)/100});
+  byDiscount.sort(function(a,b){ return b.value - a.value; });
+  var topCustomers = arr(custMap).slice(0,5);
+  var labels = [], salesSeries = [], expSeries = [], targetSeries = [];
+  var dailyTarget = DEMO_META.dailyTarget, monthlyTarget = DEMO_META.monthlyTarget;
+  if(month > 0){
+    var dim = new Date(year, month, 0).getDate();
+    var dS = {}, dE = {};
+    for(i=0;i<sRows.length;i++) if(sRows[i].completed) dS[sRows[i].date.getDate()] = (dS[sRows[i].date.getDate()]||0) + sRows[i].net;
+    for(i=0;i<eRows.length;i++) dE[eRows[i].date.getDate()] = (dE[eRows[i].date.getDate()]||0) + eRows[i].amount;
+    for(var d=1; d<=dim; d++){ labels.push(String(d)); salesSeries.push(Math.round((dS[d]||0)*100)/100); expSeries.push(Math.round((dE[d]||0)*100)/100); targetSeries.push(dailyTarget); }
+  } else {
+    var mS = {}, mE = {};
+    for(i=0;i<sRows.length;i++) if(sRows[i].completed) mS[sRows[i].date.getMonth()] = (mS[sRows[i].date.getMonth()]||0) + sRows[i].net;
+    for(i=0;i<eRows.length;i++) mE[eRows[i].date.getMonth()] = (mE[eRows[i].date.getMonth()]||0) + eRows[i].amount;
+    for(var m=0; m<12; m++){ labels.push(MONTHS[m]); salesSeries.push(Math.round((mS[m]||0)*100)/100); expSeries.push(Math.round((mE[m]||0)*100)/100); targetSeries.push(monthlyTarget); }
+  }
+  var netSeries = [];
+  for(var ns=0; ns<salesSeries.length; ns++) netSeries.push(Math.round((salesSeries[ns]-expSeries[ns])*100)/100);
+  var bestMonth = {label:'-', value:0}, monthsWithData = 0, targetsAchieved = 0;
+  if(month > 0){ monthsWithData = 1; targetsAchieved = totalS >= monthlyTarget ? 1 : 0; bestMonth = {label:MONTHS[month-1], value:totalS}; }
+  else {
+    var mS2 = {};
+    for(i=0;i<sRows.length;i++) if(sRows[i].completed) mS2[sRows[i].date.getMonth()] = (mS2[sRows[i].date.getMonth()]||0) + sRows[i].net;
+    for(var mm=0; mm<12; mm++){
+      var mv = mS2[mm] || 0;
+      if(mv > 0){ monthsWithData++; if(mv >= monthlyTarget) targetsAchieved++; if(mv > bestMonth.value) bestMonth = {label:MONTHS[mm], value:mv}; }
+    }
+  }
+  var todaySales = 0, now = new Date();
+  for(i=0;i<sRows.length;i++) if(sRows[i].completed && sRows[i].date.getFullYear()===now.getFullYear() && sRows[i].date.getMonth()===now.getMonth() && sRows[i].date.getDate()===now.getDate()) todaySales += sRows[i].net;
+  var periodLabel = day ? year+'-'+('0'+month).slice(-2)+'-'+('0'+day).slice(-2) : (month ? MONTHS[month-1]+' '+year : 'Sanadka '+year);
+  var recentSales = sRows.filter(function(r){ return r.completed; }).sort(function(a,b){ return b.date - a.date; }).slice(0,50)
+    .map(function(r){ return {date:fmtD(r.date), invoiceId:r.invoiceId||'', customer:r.customer, salesperson:r.salesperson, district:r.district, net:r.net, balance:r.balance}; });
+  var recentExp = eRows.slice().sort(function(a,b){ return b.date - a.date; }).slice(0,50)
+    .map(function(r){ return {date:fmtD(r.date), category:r.category, description:r.description, amount:r.amount, paidBy:r.paidBy||''}; });
+  return {
+    periodLabel: periodLabel,
+    kpi: { sales:Math.round(totalS*100)/100, expenses:Math.round(totalE*100)/100, net:net,
+      profit30:Math.round(net*100)/100, orders:orders,
+      avgDay: orders ? Math.round(totalS/orders*100)/100 : 0,
+      margin: totalS ? Math.round(net/totalS*10000)/100 : 0, dailyTarget:dailyTarget, monthlyTarget:monthlyTarget, profitRate:DEMO_META.profitRate },
+    labels:labels, salesSeries:salesSeries, expSeries:expSeries, targetSeries:targetSeries, netSeries:netSeries,
+    byCategory:arr(catMap), salespeople:salespeople,
+    byPerson: salespeople.map(function(p){ return {label:p.label, value:p.sales}; }),
+    byDistrict:arr(distMap), byDiscount:byDiscount, byType:typeMap, topCustomers:topCustomers,
+    analysis: {
+      customers: Object.keys(newPh).length + Object.keys(retPh).length,
+      newCount: Object.keys(newPh).length, returningCount: Object.keys(retPh).length,
+      pending: pending, completedOrders: orders,
+      debt: Math.round(debtTotal*100)/100, debtCustomers: Object.keys(debtCust).length,
+      discountTotal: Math.round(discountTotal*100)/100, discountOrders: discountOrders,
+      delivery: Math.round(deliveryTotal*100)/100, deliveryOrders: deliveryOrders,
+      avgOrder: orders ? Math.round(totalS/orders*100)/100 : 0,
+      bestPerson: salespeople.length ? salespeople[0] : null,
+      bestDistrict: arr(distMap)[0] || null,
+      bestMonth: bestMonth,
+      targetsAchieved: targetsAchieved, targetsTotal: monthsWithData,
+      todaySales: Math.round(todaySales*100)/100, todayTarget: dailyTarget,
+      todayPct: dailyTarget ? Math.round(todaySales/dailyTarget*100) : 0
+    },
+    recentSales: recentSales, recentExp: recentExp,
+    weekday: (function(){
+      var wdNames = ['Axad','Isniin','Talaado','Arbaco','Khamiis','Jimce','Sabti'];
+      var wS=[0,0,0,0,0,0,0], wO=[0,0,0,0,0,0,0], wE=[0,0,0,0,0,0,0];
+      for(var wi=0; wi<sRows.length; wi++){
+        if(!sRows[wi].completed) continue;
+        var wd1 = sRows[wi].date.getDay();
+        wS[wd1] = Math.round((wS[wd1]+sRows[wi].net)*100)/100; wO[wd1]++;
+      }
+      for(wi=0; wi<eRows.length; wi++){
+        var wd2 = eRows[wi].date.getDay();
+        wE[wd2] = Math.round((wE[wd2]+eRows[wi].amount)*100)/100;
+      }
+      var best = wdNames[wS.indexOf(Math.max.apply(null, wS))];
+      return { labels: wdNames, sales: wS, orders: wO, expenses: wE, best: best };
+    })(),
+    orders: (function(){
+      var oSeries = new Array(12).fill(0), cSeries = new Array(12).fill(0), yO = 0, yC = 0;
+      var pendingOrders = [], receivedOrders = [], cancelledOrders = [], pendingTotal = 0;
+      for(var pi=0; pi<DEMO_ORDERS.length; pi++){
+        var ord = DEMO_ORDERS[pi];
+        var st = String(ord.status).toLowerCase();
+        var total = demoOrderTotal(ord.items);
+        if(ord.date.getFullYear() === year && st !== 'cancelled'){
+          var pm = ord.date.getMonth();
+          oSeries[pm] = Math.round((oSeries[pm]+total)*100)/100;
+          yO += total;
+        }
+        if(st === 'received' && ord.receivedDate && ord.receivedDate.getFullYear() === year){
+          var cm = ord.receivedDate.getMonth();
+          cSeries[cm] = Math.round((cSeries[cm]+ord.cargo+ord.otherCosts)*100)/100;
+          yC += (ord.cargo + ord.otherCosts);
+        }
+        var orow = { id:ord.id, date:fmtD(ord.date), supplier:ord.supplier, notes:ord.notes, status:ord.status,
+          receivedDate: ord.receivedDate ? fmtD(ord.receivedDate) : '', cargo:ord.cargo, otherCosts:ord.otherCosts,
+          items:ord.items, total:total, days: demoOrderDays(ord.date, ord.receivedDate, ord.status) };
+        if(st === 'pending'){ pendingOrders.push(orow); pendingTotal += total; }
+        else if(st === 'received') receivedOrders.push(orow);
+        else cancelledOrders.push(orow);
+      }
+      pendingOrders.sort(function(a,b){ return b.days - a.days; });
+      receivedOrders.sort(function(a,b){ return (b.receivedDate||'').localeCompare(a.receivedDate||''); });
+      return { monthLabels: MONTHS, orderedSeries: oSeries, cargoSeries: cSeries,
+        yearOrdered: Math.round(yO*100)/100, yearCargo: Math.round(yC*100)/100,
+        pendingCount: pendingOrders.length, pendingTotal: Math.round(pendingTotal*100)/100,
+        receivedCount: receivedOrders.length,
+        pending: pendingOrders, received: receivedOrders.slice(0,30), cancelled: cancelledOrders.slice(0,20) };
+    })()
+  };
+}
+function fmtD(d){ var dd=('0'+d.getDate()).slice(-2), mm=('0'+(d.getMonth()+1)).slice(-2); return d.getFullYear()+'-'+mm+'-'+dd; }
+function demoAddSale(f){
+  var row = drow(Number(f.date.slice(0,4)), Number(f.date.slice(5,7)), Number(f.date.slice(8,10)),
+    f.customer, f.phone, f.custType, f.district, f.salesperson, f.payMethod, f.status,
+    Number(f.gross), Number(f.discount), Number(f.initial));
+  row.paper = f.paper || '';
+  DEMO_SALES.push(row);
+  return { ok:true, invoiceId: row.invoiceId, msg:'Iibka waa la kaydiyay (demo): '+row.invoiceId };
+}
+function demoAddExpense(f){
+  DEMO_EXP.push({ date: new Date(f.date), category:f.category, description:f.desc, amount:Number(f.amount), paidBy:f.paidBy||'' });
+  return { ok:true, msg:'Kharashka waa la kaydiyay (demo).' };
+}
+function demoGetReceipt(q){
+  q = String(q||'').trim().toLowerCase();
+  if(!q) return { ok:false, msg:'Geli Invoice ID.' };
+  for(var i=0;i<DEMO_SALES.length;i++){
+    var s = DEMO_SALES[i];
+    if(s.invoiceId.toLowerCase() === q || s.paper.toLowerCase() === q || String(s.phone||'').toLowerCase() === q){
+      return { ok:true, r:{ invoiceId:s.invoiceId, paper:s.paper, date:fmtD(s.date), customer:s.customer, phone:s.phone,
+        location:s.location, gross:s.gross, discount:s.discount, net:s.net, totalPaid:s.totalPaid, balance:s.balance, status:s.status, salesperson:s.salesperson,
+        profit: Math.round(s.net * DEMO_META.profitRate * 100) / 100, profitRate: DEMO_META.profitRate } };
+    }
+  }
+  return { ok:false, msg:'Invoice lama helin.' };
+}
+function demoSearchCustomer(q){
+  q = String(q||'').trim().toLowerCase();
+  var out = [];
+  for(var i=0;i<DEMO_SALES.length;i++){
+    var s = DEMO_SALES[i];
+    if(s.customer.toLowerCase().indexOf(q) !== -1 || s.phone.indexOf(q) !== -1){
+      out.push({ date:fmtD(s.date), invoiceId:s.invoiceId, customer:s.customer, phone:s.phone, net:s.net, balance:s.balance, status:s.status });
+    }
+  }
+  out.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  return { ok:true, items: out.slice(0,20) };
+}
+
+function setupControls(meta){
+  var ySel = $('fYear'); ySel.innerHTML = '';
+  meta.years.forEach(function(y){
+    var o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if(y === new Date().getFullYear()) o.selected = true;
+    ySel.appendChild(o);
+  });
+  var mSel = $('fMonth'); mSel.innerHTML = '';
+  mSel.add(new Option('Dhammaan bilaha','0'));
+  MONTHS.forEach(function(m,i){ mSel.add(new Option(m, String(i+1))); });
+  var dSel = $('fDay'); dSel.innerHTML = '';
+  dSel.add(new Option('Dhammaan maalmaha','0'));
+  for(var d=1; d<=31; d++) dSel.add(new Option(String(d), String(d)));
+  $('fDay').disabled = true;
+  var pSel = $('sPerson'); pSel.innerHTML = '';
+  var knownPeople = [];
+  (meta.salespeople || []).forEach(function(p){ if(knownPeople.indexOf(p) === -1) knownPeople.push(p); });
+  try {
+    var savedPeople = JSON.parse(store.getItem('hh_people') || '[]');
+    savedPeople.forEach(function(p){ if(knownPeople.indexOf(p) === -1) knownPeople.push(p); });
+  } catch(e){}
+  knownPeople.forEach(function(p){ pSel.add(new Option(p, p)); });
+  pSel.add(new Option('➕ Iibiye cusub...', '__new__'));
+  var dSel2 = $('sDistrict'); dSel2.innerHTML = '';
+  DISTRICTS.forEach(function(dd){ dSel2.add(new Option(dd, dd)); });
+  customDistricts.forEach(function(dd){ dSel2.add(new Option(dd, dd)); });
+  dSel2.add(new Option('➕ Degmo / Magaalo cusub...', '__new__'));
+  var today = new Date();
+  $('sDate').value = today.getFullYear()+'-'+('0'+(today.getMonth()+1)).slice(-2)+'-'+('0'+today.getDate()).slice(-2);
+  $('eDate').value = $('sDate').value;
+}
+
+/* ================= UI ================= */
+function $(id){ return document.getElementById(id); }
+function fmt(n){
+  var neg = n < 0; n = Math.abs(n);
+  var s = n.toLocaleString('en-US',{minimumFractionDigits:0, maximumFractionDigits:2});
+  return (neg ? '-$' : '$') + s;
+}
+function toast(msg){
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function openModal(id){ $(id).classList.remove('hidden'); }
+function closeModal(id){ $(id).classList.add('hidden'); }
+function toggleDisc(){ $('sDiscInputWrap').style.display = $('sDiscType').value === 'None' ? 'none' : 'block'; }
+function toggleCat(){ $('eNewCatWrap').style.display = $('eCat').value === 'Other' ? 'block' : 'none'; }
+
+/* ================= Login ================= */
+function doLogin(){
+  var u = $('loginUser').value.trim();
+  var p = $('loginPass').value;
+  var err = $('loginErr');
+  if(!u || !p){ err.textContent = 'Fadlan buuxi username iyo password.'; err.classList.add('show'); return; }
+  err.classList.remove('show');
+  var btn = $('loginBtn'); btn.disabled = true; btn.textContent = '...';
+  if(!hasBackend()){
+    state.token = 'demo'; state.user = { user:'demo', name:'Demo Admin', role:'Admin' };
+    store.setItem('hh_token', 'demo');
+    enterDashboard();
+    toast('Waxaad gashay qaab tijaabo (demo) - xog tijaabo ah ayaa la tusayaa.');
+    return;
+  }
+  google.script.run
+    .withSuccessHandler(function(res){
+      btn.disabled = false; btn.textContent = 'Soo Gal (Login)';
+      if(res.ok){
+        state.token = res.token; state.user = res.user;
+        store.setItem('hh_token', res.token);
+        enterDashboard();
+      } else {
+        err.textContent = res.msg; err.classList.add('show');
+      }
+    })
+    .withFailureHandler(function(e){
+      btn.disabled = false; btn.textContent = 'Soo Gal (Login)';
+      err.textContent = 'Khalad: ' + e.message; err.classList.add('show');
+    })
+    .login(u, p);
+}
+
+function doLogout(){
+  var t = state.token;
+  state.token = null; store.removeItem('hh_token');
+  if(!hasBackend()){ location.reload(); return; }
+  google.script.run.withSuccessHandler(function(){ location.reload(); }).logout(t);
+}
+
+/* ================= Dashboard ================= */
+function enterDashboard(){
+  $('loginView').classList.add('hidden');
+  $('dashView').classList.remove('hidden');
+  var u = state.user;
+  $('avatar').textContent = (u.name || u.user || 'A').charAt(0).toUpperCase();
+  $('userName').textContent = u.name || u.user;
+  $('userRole').textContent = u.role;
+  var badge = $('roleBadge');
+  badge.textContent = u.role;
+  badge.className = 'badge ' + (String(u.role).toLowerCase() === 'admin' ? 'admin' : 'staff');
+  if(DEMO_MODE){ $('demoBanner').style.display = 'block'; }
+  applyRoleUI();
+  loadMeta();
+}
+
+function loadMeta(){
+  if(!hasBackend()){
+    state.theme = store.getItem('hh_theme_palette') || 'classic';
+    if(!THEMES[state.theme]) state.theme = 'classic';
+    document.body.setAttribute('data-theme', state.theme);
+    state.meta = {
+      years: DEMO_META.years,
+      dailyTarget: DEMO_META.dailyTarget,
+      monthlyTarget: DEMO_META.monthlyTarget,
+      profitRate: DEMO_META.profitRate,
+      salespeople: DEMO_META.salespeople,
+      categories: DEMO_META.categories,
+      currency: 'USD',
+      bizName: store.getItem('hh_bizname') || 'Happy Home',
+      bizInfo: store.getItem('hh_bizinfo') || 'Mogadishu, Hodan — Tel: 0612345678',
+      bizLogo: store.getItem('hh_logo') || ''
+    };
+    setupControls(state.meta);
+    state.filter = { year: new Date().getFullYear(), month: 0, day: 0 };
+    initCharts();
+    applyFilter();
+    applyBranding();
+    return;
+  }
+  google.script.run
+    .withSuccessHandler(function(meta){
+      if(meta && meta.error === 'login'){ forceLogin(); return; }
+      state.meta = meta;
+      state.theme = meta.theme || 'classic';
+      if(!THEMES[state.theme]) state.theme = 'classic';
+      document.body.setAttribute('data-theme', state.theme);
+      setupControls(meta);
+      state.filter = { year: new Date().getFullYear(), month: 0, day: 0 };
+      initCharts();
+      applyFilter();
+      applyBranding();
+    })
+    .withFailureHandler(function(e){ toast('Khalad: ' + e.message); })
+    .getMeta(state.token);
+}
+
+function resetFilter(){
+  $('fYear').value = String(new Date().getFullYear());
+  $('fMonth').value = '0';
+  $('fDay').value = '0';
+  $('fDay').disabled = true;
+  applyFilter();
+}
+
+$('fMonth').addEventListener('change', function(){
+  $('fDay').disabled = this.value === '0';
+  if(this.value === '0') $('fDay').value = '0';
+});
+
+function applyFilter(){
+  state.filter = {
+    year: Number($('fYear').value) || new Date().getFullYear(),
+    month: Number($('fMonth').value) || 0,
+    day: Number($('fDay').value) || 0
+  };
+  var btn = $('applyBtn'); btn.disabled = true;
+  if(!hasBackend()){ render(demoData(state.filter)); return; }
+  google.script.run
+    .withSuccessHandler(function(d){
+      btn.disabled = false;
+      if(d && d.error === 'login'){ forceLogin(); return; }
+      render(d);
+    })
+    .withFailureHandler(function(e){
+      btn.disabled = false; toast('Khalad: ' + e.message);
+    })
+    .getData(state.token, state.filter);
+}
+
+function forceLogin(){
+  state.token = null; store.removeItem('hh_token');
+  $('dashView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  toast('Fadlan dib u soo gal.');
+}
+
+/* ================= Theme (Dark / Light) ================= */
+function toggleTheme(){
+  var light = document.body.classList.toggle('light');
+  LIGHT = light;
+  store.setItem('hh_theme', light ? 'light' : 'dark');
+  var tb = $('btnTheme');
+  if(tb) tb.textContent = light ? '🌙' : '☀️';
+  Chart.defaults.color = LIGHT ? '#68717d' : '#94a3b8';
+  if(state.meta) applyFilter();
+}
+
+/* ================= Roles ================= */
+function isAdmin(){ return !!(state.user && String(state.user.role).toLowerCase() === 'admin'); }
+function applyRoleUI(){
+  var adminOnly = ['btnExport','btnPrint','btnReceipt','btnSettings'];
+  for(var i=0;i<adminOnly.length;i++){
+    var el = $(adminOnly[i]);
+    if(el) el.style.display = isAdmin() ? '' : 'none';
+  }
+}
+
+/* ================= Branding ================= */
+function applyBranding(){
+  var meta = state.meta || {};
+  var name = meta.bizName || 'Happy Home';
+  var logo = meta.bizLogo || defaultLogo();
+  var bn = $('brandName'); if(bn) bn.textContent = name;
+  var lt = $('loginTitle'); if(lt) lt.textContent = name;
+  var bL = $('brandLogo'), lL = $('loginLogo');
+  var img = '<img src="' + logo + '" alt="logo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+  if(bL) bL.innerHTML = img;
+  if(lL) lL.innerHTML = img;
+}
+
+/* ================= Settings ================= */
+function openSettings(){
+  var meta = state.meta || {};
+  pendingTheme = '';
+  buildThemeRow();
+  $('bizNameInput').value = meta.bizName || 'Happy Home';
+  $('bizInfoInput').value = meta.bizInfo || '';
+  $('pOld').value = ''; $('pNew').value = '';
+  pendingLogo = '';
+  var lg = meta.bizLogo || defaultLogo();
+  var prev = $('logoPreview');
+  if(lg){ prev.src = lg; prev.classList.remove('hidden'); }
+  else { prev.classList.add('hidden'); prev.removeAttribute('src'); }
+  $('geminiKeyInput').value = '';
+  $('geminiKeyStatus').textContent = '';
+  if(hasBackend()){
+    google.script.run.withSuccessHandler(function(res){
+      if(res && res.ok) $('geminiKeyStatus').textContent = res.has ? '✓ API Key waa la kaydiyay' : 'Weli lama kaydin';
+    }).hasGeminiKey(state.token);
+  } else {
+    $('geminiKeyStatus').textContent = 'Demo mode - scan-ku wuxuu u baahan yahay backend dhab ah';
+  }
+  openModal('settingsModal');
+}
+function saveGeminiKeyUI(){
+  var key = $('geminiKeyInput').value.trim();
+  if(!key){ toast('Fadlan geli API Key-ga.'); return; }
+  if(!hasBackend()){ toast('Demo mode - backend dhab ah waa loo baahan yahay.'); return; }
+  google.script.run.withSuccessHandler(function(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la kaydiyay.');
+    $('geminiKeyStatus').textContent = '✓ API Key waa la kaydiyay';
+    $('geminiKeyInput').value = '';
+  }).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).saveGeminiKey(state.token, key);
+}
+function readLogoFile(){
+  var f = $('logoFile').files[0];
+  if(!f) return;
+  var url = URL.createObjectURL(f);
+  var img = new Image();
+  img.onload = function(){
+    var cv = document.createElement('canvas');
+    cv.width = 96; cv.height = 96;
+    var ctx = cv.getContext('2d');
+    var s = Math.min(img.width, img.height);
+    ctx.drawImage(img, (img.width - s)/2, (img.height - s)/2, s, s, 0, 0, 96, 96);
+    var dataUrl = cv.toDataURL('image/png');
+    if(dataUrl.length > 8000){ toast('Sawirka wuu weyn yahay - isku day sawar fudud.'); return; }
+    pendingLogo = dataUrl;
+    $('logoPreview').src = dataUrl;
+    $('logoPreview').classList.remove('hidden');
+    toast('Logo waa la diyaariyay - riix "Kaydi Settings".');
+  };
+  img.onerror = function(){ toast('Sawirka lama akhriyi karo.'); };
+  img.src = url;
+}
+function clearLogo(){
+  pendingLogo = '__clear__';
+  $('logoPreview').classList.add('hidden');
+  $('logoFile').value = '';
+}
+function buildThemeRow(){
+  var row = $('themeRow');
+  row.innerHTML = '';
+  Object.keys(THEMES).forEach(function(k){
+    var t = THEMES[k];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'theme-opt' + (state.theme === k ? ' sel' : '');
+    b.setAttribute('data-k', k);
+    b.innerHTML = '<span class="dots">' + t.palette.map(function(c){ return '<i style="background:' + c + '"></i>'; }).join('') + '</span>' + t.name;
+    b.onclick = function(){ selectTheme(k); };
+    row.appendChild(b);
+  });
+}
+function selectTheme(k){
+  pendingTheme = k;
+  var opts = document.querySelectorAll('.theme-opt');
+  for(var i=0;i<opts.length;i++) opts[i].classList.toggle('sel', opts[i].getAttribute('data-k') === k);
+}
+function saveSettings(){
+  var name = $('bizNameInput').value.trim();
+  if(!name){ toast('Qor magaca ganacsiga.'); return; }
+  var info = $('bizInfoInput').value.trim();
+  var clear = pendingLogo === '__clear__';
+  var logo = (!clear && pendingLogo) ? pendingLogo : '';
+  var theme = pendingTheme || '';
+  function done(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    if(res && !res.ok){ toast(res.msg); return; }
+    if(state.meta){
+      state.meta.bizName = name;
+      state.meta.bizInfo = info;
+      if(logo) state.meta.bizLogo = logo;
+      if(clear) state.meta.bizLogo = '';
+    }
+    store.setItem('hh_bizname', name);
+    store.setItem('hh_bizinfo', info);
+    if(logo) store.setItem('hh_logo', logo);
+    if(clear) store.removeItem('hh_logo');
+    if(theme && THEMES[theme]){
+      state.theme = theme;
+      store.setItem('hh_theme_palette', theme);
+      document.body.setAttribute('data-theme', theme);
+    }
+    pendingLogo = '';
+    pendingTheme = '';
+    applyBranding();
+    if(theme && THEMES[theme]) applyFilter();
+    closeModal('settingsModal');
+    toast(res && res.msg ? res.msg : 'Settings waa la kaydiyay.');
+  }
+  if(!hasBackend()){ done({ ok:true, msg:'Settings waa la kaydiyay (demo).' }); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).saveSettings(state.token, { name: name, info: info, logo: logo, clearLogo: clear, theme: theme });
+}
+function changePassword(){
+  var oldP = $('pOld').value, newP = $('pNew').value;
+  if(!oldP || newP.length < 5){ toast('Buuxi password-ka hadda iyo cusub (≥5 xaraf).'); return; }
+  function done(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    if(res && !res.ok){ toast(res.msg); return; }
+    $('pOld').value = ''; $('pNew').value = '';
+    toast(res && res.msg ? res.msg : 'Password waa la badalay.');
+  }
+  if(!hasBackend()){ done({ ok:true, msg:'Demo-ga password lama badali karo - Google Sheets-ka ayaa ku shaqayn doona.' }); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).changePassword(state.token, oldP, newP);
+}
+
+/* ================= Charts ================= */
+var charts = {};
+function initCharts(){
+  Chart.defaults.font.family = "'Inter',system-ui,sans-serif";
+  Chart.defaults.color = LIGHT ? '#68717d' : '#94a3b8';
+  charts.main = new Chart($('mainChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.cat = new Chart($('catChart'), { type:'doughnut', data:{labels:[],datasets:[]}, options:{} });
+  charts.target = new Chart($('targetChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.person = new Chart($('personChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.dist = new Chart($('distChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.type = new Chart($('typeChart'), { type:'doughnut', data:{labels:[],datasets:[]}, options:{} });
+  charts.top = new Chart($('topChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.profit = new Chart($('profitChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.purch = new Chart($('purchChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.cargo = new Chart($('cargoChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+  charts.weekday = new Chart($('weekdayChart'), { type:'bar', data:{labels:[],datasets:[]}, options:{} });
+}
+function baseOpts(horiz){
+  var grid = LIGHT ? '#e5ddc4' : '#2b3a52';
+  var tick = LIGHT ? '#68717d' : '#94a3b8';
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, labels:{ boxWidth:12, boxHeight:12, font:{size:11} } } },
+    scales: {
+      x:{ grid:{display:false}, ticks:{font:{size:10.5}, color:tick} },
+      y:{ beginAtZero:true, grid:{color:grid}, ticks:{font:{size:10.5}, color:tick, callback:function(v){ return '$'+v; }} }
+    }
+  };
+}
+
+function render(d){
+  var k = d.kpi, a = d.analysis;
+  state.kpiData = { sales:k.sales, expenses:k.expenses, net:k.net, margin:k.margin, orders:k.orders };
+  $('periodChip').textContent = d.periodLabel;
+  $('kSales').textContent = fmt(k.sales);
+  $('kSalesSub').textContent = k.sales >= k.dailyTarget ? '✓ Yoolka maanta la gaadhay' : 'Yool maalinle: ' + fmt(k.dailyTarget);
+  $('kExp').textContent = fmt(k.expenses);
+  $('kExpSub').textContent = 'Qaybaha: ' + d.byCategory.length;
+  $('kNet').textContent = fmt(k.net);
+  $('kNet').className = 'val ' + (k.net >= 0 ? 'pos' : 'neg');
+  $('kNetSub').textContent = 'Margin: ' + k.margin + '%  •  Faa\'iidada dhabta = ' + fmt(k.profit30);
+  $('kOrders').textContent = k.orders;
+  $('kOrdersSub').textContent = 'Celcelis iibkii: ' + fmt(k.avgDay);
+  $('kTarget').textContent = fmt(k.sales) + ' / ' + fmt(k.monthlyTarget);
+  var pct = k.monthlyTarget > 0 ? Math.round((k.sales / k.monthlyTarget) * 100) : 0;
+  $('kTargetSub').textContent = pct + '% ee yoolka bishan';
+
+  /* Analysis cards */
+  $('aCustomers').textContent = a.customers;
+  $('aCustomersSub').textContent = 'Cusub: ' + a.newCount + '  |  Soo noqday: ' + a.returningCount;
+  $('aOrders').textContent = a.completedOrders;
+  $('aOrdersSub').textContent = 'Pending: ' + a.pending;
+  $('aDebt').textContent = fmt(a.debt);
+  $('aDebtSub').textContent = 'Macaamiil: ' + a.debtCustomers;
+  $('aBestPerson').textContent = a.bestPerson ? a.bestPerson.label : '-';
+  $('aBestPersonSub').textContent = a.bestPerson ? 'Iibka: ' + fmt(a.bestPerson.sales) + '  •  Dalab: ' + a.bestPerson.orders : '-';
+  $('aBestDistrict').textContent = a.bestDistrict ? a.bestDistrict.label : '-';
+  $('aBestDistrictSub').textContent = a.bestDistrict ? 'Iibka: ' + fmt(a.bestDistrict.value) : '-';
+  $('aBestMonth').textContent = a.bestMonth ? a.bestMonth.label : '-';
+  $('aBestMonthSub').textContent = a.bestMonth ? 'Iibka: ' + fmt(a.bestMonth.value) : '-';
+  $('aDiscount').textContent = fmt(a.discountTotal);
+  $('aDiscountSub').textContent = 'Dalabyo: ' + a.discountOrders;
+  $('aDelivery').textContent = fmt(a.delivery || 0);
+  $('aDeliverySub').textContent = 'Dalabyo: ' + (a.deliveryOrders || 0);
+  $('aTargets').textContent = a.targetsAchieved + ' / ' + a.targetsTotal;
+  $('aTargetsSub').textContent = 'Bilo la gaaray: ' + a.targetsAchieved + ' | Haray: ' + Math.max(0, a.targetsTotal - a.targetsAchieved);
+  $('aTodayVal').textContent = fmt(a.todaySales) + ' / ' + fmt(a.todayTarget);
+  $('aTodaySub').textContent = a.todayPct >= 100 ? '✓ LA GAADHAY' : a.todayPct + '% SOCOTA';
+  $('aTodayBar').style.width = Math.min(100, a.todayPct) + '%';
+
+  var isMonth = state.filter.month > 0 && state.filter.day === 0;
+  var isDay = state.filter.day > 0;
+
+  /* Main chart */
+  var mainC = charts.main;
+  if(isDay){
+    $('mainChartTitle').textContent = 'Maalinta - Iibka vs Kharashka vs Yoolka';
+    $('mainChartHint').textContent = d.periodLabel;
+    mainC.data = { labels:['Iibka','Kharashka','Yoolka Maalinlaha'],
+      datasets:[
+        { label:'Iibka', data:[k.sales,0,0], backgroundColor:themeColor('chart'), borderRadius:6 },
+        { label:'Kharashka', data:[0,k.expenses,0], backgroundColor:'#ef4444', borderRadius:6 },
+        { label:'Yoolka', data:[0,0,k.dailyTarget], backgroundColor:'#f59e0b', borderRadius:6 }
+      ]};
+  } else if(isMonth){
+    $('mainChartTitle').textContent = 'Iibka vs Kharashka - Maalin kasta';
+    $('mainChartHint').textContent = d.periodLabel + ' (xariiq = yoolka maalinlaha)';
+    mainC.data = { labels:d.labels,
+      datasets:[
+        { label:'Iibka', data:d.salesSeries, backgroundColor:themeColor('chart'), borderRadius:3 },
+        { label:'Kharashka', data:d.expSeries, backgroundColor:'#ef4444', borderRadius:3 },
+        { label:'Yoolka', data:d.targetSeries, type:'line', borderColor:'#f59e0b', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:.3 }
+      ]};
+  } else {
+    $('mainChartTitle').textContent = 'Iibka vs Kharashka - Bishii';
+    $('mainChartHint').textContent = d.periodLabel + ' (xariiq = yoolka bishan)';
+    mainC.data = { labels:d.labels,
+      datasets:[
+        { label:'Iibka', data:d.salesSeries, backgroundColor:themeColor('chart'), borderRadius:4 },
+        { label:'Kharashka', data:d.expSeries, backgroundColor:'#ef4444', borderRadius:4 },
+        { label:'Yoolka', data:d.targetSeries, type:'line', borderColor:'#f59e0b', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:.3 }
+      ]};
+  }
+  mainC.options = baseOpts(false);
+  mainC.update();
+
+  /* Category doughnut */
+  var cat = d.byCategory.slice(0,7);
+  charts.cat.data = { labels: cat.map(function(x){return x.label;}), datasets:[{
+    data: cat.map(function(x){return x.value;}),
+    backgroundColor: themeColor('palette').concat(['#ef4444','#64748b']),
+    borderWidth:2, borderColor:'#1e293b'
+  }]};
+  charts.cat.options = baseOpts(false);
+  charts.cat.update();
+
+  /* Target chart - bisha la doortay: yoolka MAALINLAHA; sanadka: yoolka bishan */
+  var tgtLine = state.filter.month > 0 ? k.dailyTarget : k.monthlyTarget;
+  $('targetChartTitle').textContent = isDay ? 'Yoolka Maalinta - ' + d.periodLabel : (isMonth ? 'Target-ka Maalinlaha - ' + d.periodLabel : 'Target-ka Bisha - Bilo ' + (state.filter.year || new Date().getFullYear()));
+  charts.target.data = { labels:d.labels,
+    datasets:[
+      { label:'Iibka', data:d.salesSeries,
+        backgroundColor: d.salesSeries.map(function(v){ return v >= tgtLine ? '#22c55e' : '#f59e0b'; }),
+        borderRadius:5 },
+      { label:'Target', data:d.targetSeries, type:'line', borderColor:'#ff6b6b', backgroundColor:'transparent', borderWidth:2, borderDash:[6,4], pointRadius:0 }
+    ]};
+  charts.target.options = baseOpts(false);
+  charts.target.update();
+
+  /* Discount + Iibka isku chart (labadaba) */
+  var per = d.byPerson.slice(0,8);
+  var discMap = {};
+  d.salespeople.forEach(function(p){ discMap[p.label] = p.discountAmt; });
+  var plabels = per.map(function(x){ return x.label; }).reverse();
+  charts.person.data = { labels: plabels, datasets:[
+    { label:'Iibka', data: per.map(function(x){ return x.value; }).reverse(), backgroundColor:themeColor('chart'), borderRadius:4 },
+    { label:'Discount', data: plabels.map(function(l){ return discMap[l] || 0; }), backgroundColor:themeColor('chart2'), borderRadius:4 }
+  ]};
+  charts.person.options = baseOpts(true);
+  charts.person.options.indexAxis = 'y';
+  charts.person.update();
+
+  /* Faa'iidada (Net) - bishii / maalin kasta */
+  $('profitChartTitle').textContent = (state.filter.month > 0 && state.filter.day === 0) ? "Faa'iidada - Maalin kasta" : "Faa'iidada - Bishii";
+  $('profitChartHint').textContent = d.periodLabel + ' • Cagaar = faa\'iido • Casaan = khasaaro';
+  charts.profit.data = { labels: d.labels, datasets:[{
+    label:"Faa'iidada (Iib - Kharash)", data: d.netSeries,
+    backgroundColor: d.netSeries.map(function(v){ return v >= 0 ? '#22c55e' : '#ef4444'; }),
+    borderRadius:4
+  }]};
+  charts.profit.options = baseOpts(false);
+  charts.profit.update();
+
+  /* District */
+  var dis = d.byDistrict.slice(0,10);
+  charts.dist.data = { labels: dis.map(function(x){return x.label;}), datasets:[{
+    label:'Iibka', data: dis.map(function(x){return x.value;}), backgroundColor:themeColor('chart'), borderRadius:4
+  }]};
+  charts.dist.options = baseOpts(false);
+  charts.dist.update();
+
+  /* Customer type */
+  var tArr = [d.byType['New'] || 0, d.byType['Returning'] || 0];
+  charts.type.data = { labels:['Cusub (New)','Soo Noqday (Returning)'], datasets:[{
+    data:tArr, backgroundColor:[themeColor('accent'), themeColor('chart')], borderWidth:2, borderColor:'#1e293b'
+  }]};
+  charts.type.options = baseOpts(false);
+  charts.type.update();
+
+  /* Top customers */
+  var tc = d.topCustomers.slice(0,5);
+  charts.top.data = { labels: tc.map(function(x){return x.label;}), datasets:[{
+    label:'Iibka', data: tc.map(function(x){return x.value;}), backgroundColor:themeColor('palette')[4], borderRadius:4
+  }]};
+  charts.top.options = baseOpts(false);
+  charts.top.update();
+
+  /* Salesperson stats table */
+  var spb = $('spTableBody');
+  if(!d.salespeople.length){
+    spb.innerHTML = '<tr><td colspan="4" class="empty">Ma jiro xog</td></tr>';
+  } else {
+    spb.innerHTML = d.salespeople.map(function(p){
+      return '<tr><td>'+esc(p.label)+'</td><td class="mono pos">'+fmt(p.sales)+'</td><td class="mono">'+p.orders+'</td>'+
+        '<td class="mono">'+p.discounts+' ('+fmt(p.discountAmt)+')</td></tr>';
+    }).join('');
+  }
+
+  /* Recent tables */
+  var rsb = $('recentSalesBox');
+  if(!d.recentSales.length){
+    rsb.innerHTML = '<div class="empty">Ma jiro xog</div>';
+  } else {
+    var rows = d.recentSales.map(function(r){
+      return '<tr><td class="mono">'+esc(r.date)+'</td><td class="mono" style="color:var(--gold2)">'+esc(r.invoiceId||'')+'</td><td>'+esc(r.customer)+'</td>'+
+        '<td>'+esc(r.salesperson)+'</td><td>'+esc(r.district)+'</td>'+
+        '<td class="mono pos">'+fmt(r.net)+'</td>'+
+        '<td class="mono '+(r.balance>0?'neg':'')+'">'+fmt(r.balance)+'</td></tr>';
+    }).join('');
+    rsb.innerHTML = '<table><thead><tr><th>Taariikh</th><th>Invoice</th><th>Macmiil</th><th>Iibiyaha</th><th>Degmo</th><th>Iibka</th><th>Harteed</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+  var exb = $('recentExpBox');
+  if(!d.recentExp.length){
+    exb.innerHTML = '<div class="empty">Ma jiro xog</div>';
+  } else {
+    var erows = d.recentExp.map(function(r){
+      return '<tr><td class="mono">'+esc(r.date)+'</td><td><span class="pill">'+esc(r.category)+'</span></td>'+
+        '<td>'+esc(r.description)+'</td><td class="mono neg">'+fmt(r.amount)+'</td>'+
+        '<td>'+esc(r.paidBy||'')+'</td></tr>';
+    }).join('');
+    exb.innerHTML = '<table><thead><tr><th>Taariikh</th><th>Qaybta</th><th>Sharaxaad</th><th>Qadarka</th><th>Bixiyaha</th></tr></thead><tbody>'+erows+'</tbody></table>';
+  }
+
+  /* ---- Dalabaadka Dibadda / Overseas Orders (qeyb gooni ah, kaga baxsan Kharashka guud) ---- */
+  var od = d.orders || {monthLabels:MONTHS, orderedSeries:new Array(12).fill(0), cargoSeries:new Array(12).fill(0), yearOrdered:0, yearCargo:0, pendingCount:0, pendingTotal:0, receivedCount:0, pending:[], received:[], cancelled:[]};
+  lastOrdersData = od;
+  $('pPendingCount').textContent = od.pendingCount;
+  $('pPendingTotal').textContent = fmt(od.pendingTotal);
+  $('pReceivedCount').textContent = od.receivedCount;
+  $('pCargoTotal').textContent = 'Cargo+Kharash Sanadka: ' + fmt(od.yearCargo);
+
+  charts.purch.data = { labels: od.monthLabels, datasets:[{
+    label:'Alaabta La Dalbaday', data: od.orderedSeries, backgroundColor: themeColor('chart'), borderRadius:4
+  }]};
+  charts.purch.options = baseOpts(false);
+  charts.purch.update();
+
+  charts.cargo.data = { labels: od.monthLabels, datasets:[{
+    label:'Cargo + Kharashaad Kale', data: od.cargoSeries, backgroundColor:'#e83e6b', borderRadius:4
+  }]};
+  charts.cargo.options = baseOpts(false);
+  charts.cargo.update();
+
+  renderOrdersTable();
+
+  /* ---- Maalmaha Ugu Ganacsiga Badan (weekday, dhowr dhinac) ---- */
+  var wd = d.weekday || {labels:['Axad','Isniin','Talaado','Arbaco','Khamiis','Jimce','Sabti'], sales:[0,0,0,0,0,0,0], orders:[0,0,0,0,0,0,0], expenses:[0,0,0,0,0,0,0], best:'-'};
+  $('weekdayHint').textContent = 'Iibka, Dalabyada & Kharashka — maalinta ugu shaqada badan: ' + wd.best;
+  charts.weekday.data = { labels: wd.labels, datasets:[
+    { type:'bar', label:'Iibka ($)', data: wd.sales, backgroundColor: themeColor('chart'), borderRadius:4, order:2, yAxisID:'y' },
+    { type:'bar', label:'Kharashka ($)', data: wd.expenses, backgroundColor:'#e83e6b', borderRadius:4, order:2, yAxisID:'y' },
+    { type:'line', label:'Tirada Dalabyada', data: wd.orders, borderColor:'#4ade80', backgroundColor:'#4ade80', tension:.3, order:1, yAxisID:'y1', pointRadius:4 }
+  ]};
+  var wdOpts = baseOpts(false);
+  wdOpts.scales = wdOpts.scales || {};
+  wdOpts.scales.y1 = { position:'right', grid:{ drawOnChartArea:false } };
+  charts.weekday.options = wdOpts;
+  charts.weekday.update();
+}
+
+var lastOrdersData = null;
+var ordersTab = 'all';
+function setOrdersTab(tab){
+  ordersTab = tab;
+  document.querySelectorAll('.ov-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+  renderOrdersTable();
+}
+function renderOrdersTable(){
+  var box = $('ordersBox');
+  if(!box || !lastOrdersData) return;
+  var od = lastOrdersData;
+  var list;
+  if(ordersTab === 'pending') list = od.pending;
+  else if(ordersTab === 'received') list = od.received;
+  else if(ordersTab === 'cancelled') list = od.cancelled;
+  else list = od.pending.concat(od.received, od.cancelled).sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+
+  if(!list.length){ box.innerHTML = '<div class="empty">Ma jiro dalab</div>'; return; }
+
+  var rows = list.map(function(r){
+    var stPill = r.status === 'Received' ? '<span class="pill" style="color:#4ade80">Received</span>' :
+      (r.status === 'Cancelled' ? '<span class="pill" style="color:#f87171">Cancelled</span>' : '<span class="pill" style="color:#f59e0b">Pending</span>');
+    var itemsSummary = r.items.map(function(it){ return it.product + ' × ' + it.qty; }).join(', ');
+    var daysLbl = r.status === 'Pending' ?
+      '<span class="ov-days'+(r.days>=30?' hot':(r.days>=14?' warn':''))+'">'+r.days+'d absent</span>' :
+      (r.status === 'Received' ? '<span class="ov-days">'+r.days+'d</span>' : '<span class="ov-days">-</span>');
+    var actions = '';
+    if(r.status === 'Pending'){
+      actions = '<button class="btn btn-sm btn-green" onclick="openReceived(\''+r.id+'\')">Receive</button> '+
+        '<button class="btn btn-sm btn-outline" style="color:#f87171" onclick="doCancelOrder(\''+r.id+'\')">Cancel</button>';
+    }
+    return '<tr><td class="mono" style="color:var(--gold2)">'+esc(r.id)+'</td><td class="mono">'+esc(r.date)+'</td>'+
+      '<td>'+esc(r.supplier||'-')+'</td><td title="'+esc(itemsSummary)+'">'+r.items.length+' items ▾</td>'+
+      '<td class="mono">'+fmt(r.total)+'</td><td>'+stPill+'</td><td>'+daysLbl+'</td><td>'+actions+'</td></tr>';
+  }).join('');
+  box.innerHTML = '<table><thead><tr><th>Order ID</th><th>Date</th><th>Supplier</th><th>Items</th><th>Total</th><th>Status</th><th>Days</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* ================= Sale form extras ================= */
+function toggleNewDist(){
+  $('sNewDistWrap').style.display = $('sDistrict').value === '__new__' ? 'block' : 'none';
+}
+function togglePerson(){
+  $('sNewPersonWrap').style.display = $('sPerson').value === '__new__' ? 'block' : 'none';
+}
+function rememberPerson(p){
+  try {
+    var list = JSON.parse(store.getItem('hh_people') || '[]');
+    if(list.indexOf(p) === -1){ list.push(p); store.setItem('hh_people', JSON.stringify(list)); }
+  } catch(e){}
+}
+function recalcSale(){
+  var gross = Number($('sGross').value) || 0;
+  var dt = $('sDiscType').value;
+  var di = Number($('sDiscInput').value) || 0;
+  var disc = dt === 'Percent' ? gross * di / 100 : (dt === 'Amount ($)' ? di : 0);
+  disc = Math.max(0, Math.round(disc * 100) / 100);
+  var net = Math.max(0, Math.round((gross - disc) * 100) / 100);
+  var init = Number($('sInitial').value) || 0;
+  var paid = Math.min(init, net);
+  var bal = Math.max(0, Math.round((net - paid) * 100) / 100);
+  var col = bal > 0 ? '#f87171' : '#4ade80';
+  $('sCalcBox').innerHTML = 'Iibka: <b>' + fmt(gross) + '</b> • Discount: <b>' + (disc > 0 ? '-' : '') + fmt(disc) + '</b> • Net: <b>' + fmt(net) + '</b> • Hore: <b>' + fmt(paid) + '</b> • Harteed (Rest): <b style="color:' + col + '">' + fmt(bal) + '</b>';
+}
+/* ================= Scan (OCR - Gemini Vision, Heersare) ================= */
+function toggleScan(){ $('scanWrap').classList.toggle('hidden'); }
+function scanFile(){
+  var f = $('scanFile').files[0];
+  if(!f) return;
+  if(!hasBackend()){ $('scanStatus').textContent = 'Scan-ku wuxuu u baahan yahay backend dhab ah (Google Sheets) + Gemini API Key oo Settings lagu geliyay.'; return; }
+  var img = $('scanPreview');
+  img.src = URL.createObjectURL(f);
+  img.classList.remove('hidden');
+  $('scanText').classList.add('hidden');
+  $('scanText').innerHTML = '';
+  scanResultData = null;
+  $('scanStatus').textContent = 'Waa la akhrinayaa sawirka (Gemini Vision - heersare) - sug...';
+  var reader = new FileReader();
+  reader.onload = function(){
+    var base64 = String(reader.result).split(',')[1];
+    google.script.run
+      .withSuccessHandler(function(res){ onScanResult(res); })
+      .withFailureHandler(function(e){ $('scanStatus').textContent = 'Khalad: ' + e.message; })
+      .scanInvoiceImage(state.token, base64, f.type || 'image/jpeg');
+  };
+  reader.onerror = function(){ $('scanStatus').textContent = 'Khalad akhrinta sawirka.'; };
+  reader.readAsDataURL(f);
+}
+function onScanResult(res){
+  if(res && res.error === 'login'){ forceLogin(); return; }
+  if(!res || !res.ok){ $('scanStatus').textContent = (res && res.msg) ? res.msg : 'Scan-ku wuu fashilmay.'; return; }
+  scanResultData = res;
+  var d = res.data, v = res.verification;
+  var html = '';
+  html += '<div class="row"><span class="k">Macmiil</span><span class="v">'+esc(d.customer||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Ciwaan</span><span class="v">'+esc(d.address||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Taariikh</span><span class="v">'+esc(d.date||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Telefoon</span><span class="v">'+esc(d.phone||'-')+'</span></div>';
+  (d.items||[]).forEach(function(it, idx){
+    var mismatch = (v.itemMismatches||[]).some(function(m){ return m.row === idx+1; });
+    html += '<div class="row"'+(mismatch?' style="color:#f87171"':'')+'><span class="k">'+esc(it.name||('Alaab '+(idx+1)))+' ('+it.qty+' × '+fmt(it.unitPrice)+')</span><span class="v">'+fmt(it.total)+(mismatch?' ⚠️':'')+'</span></div>';
+  });
+  html += '<div class="row"><span class="k">Price</span><span class="v">'+fmt(d.price)+'</span></div>';
+  html += '<div class="row"><span class="k">Discount</span><span class="v">'+esc(d.discountType||'none')+' — '+d.discountValue+'</span></div>';
+  html += '<div class="row"><span class="k">Delivery</span><span class="v">'+fmt(d.delivery)+'</span></div>';
+  html += '<div class="row total"><span class="k">Total (qoran)</span><span class="v">'+fmt(d.total)+'</span></div>';
+  var warn = '';
+  if(!v.clean){
+    warn += '<div class="login-err show" style="background:#2a1410; color:#f5a7a7; border-color:#7a2020; margin-top:10px;">⚠️ Hubi xisaabta — waxaa la helay khilaaf:<br>';
+    (v.itemMismatches||[]).forEach(function(m){
+      warn += '• Saf '+m.row+' ('+esc(m.name||'')+'): '+m.qty+' × '+fmt(m.unitPrice)+' = '+fmt(m.expectedTotal)+' laakiin waxaa qoran '+fmt(m.writtenTotal)+'<br>';
+    });
+    if(v.priceMismatch) warn += '• Total-yada alaabaha ('+fmt(v.priceMismatch.itemsSum)+') kuma dhicin PRICE-ka qoran ('+fmt(v.priceMismatch.writtenPrice)+')<br>';
+    if(v.totalMismatch) warn += '• TOTAL-ka qoran ('+fmt(v.totalMismatch.writtenTotal)+') kuma dhicin xisaabinta (Price - Discount ± Delivery)<br>';
+    warn += '</div>';
+  } else {
+    warn = '<div class="login-err show" style="background:#0f2a17; color:#8ff5b0; border-color:#1e7a3a; margin-top:10px;">✓ Xisaabta sax — Qty × U.Price = Total, oo dhammaystirna waa la mid.</div>';
+  }
+  $('scanText').innerHTML = html + warn;
+  $('scanText').classList.remove('hidden');
+  $('scanStatus').textContent = 'Dhammeystay - hubi qiyaasta kore kadibna riix "Buuxi Foomka".';
+}
+function fillFromScan(){
+  if(!scanResultData || !scanResultData.ok){ toast('Marka hore scan sawirka.'); return; }
+  var d = scanResultData.data;
+  if(d.customer) $('sCustomer').value = d.customer;
+  if(d.phone) $('sPhone').value = d.phone;
+  if(d.date) $('sDate').value = d.date;
+  if(d.salesperson){
+    var pSel = $('sPerson');
+    var hasP = false;
+    for(var pi=0; pi<pSel.options.length; pi++){ if(pSel.options[pi].value === d.salesperson){ hasP = true; break; } }
+    if(!hasP){ rememberPerson(d.salesperson); pSel.insertBefore(new Option(d.salesperson, d.salesperson), pSel.options[pSel.options.length-1] || null); }
+    pSel.value = d.salesperson;
+    togglePerson();
+  }
+  if(d.address){
+    $('sDistrict').value = '__new__';
+    toggleNewDist();
+    $('sNewDist').value = d.address;
+  }
+  var price = Number(d.price) || 0;
+  if(price > 0) $('sGross').value = price;
+  var discType = String(d.discountType||'none').toLowerCase();
+  if(discType === 'percent'){ $('sDiscType').value = 'Percent'; $('sDiscInput').value = d.discountValue || 0; }
+  else if(discType === 'amount'){ $('sDiscType').value = 'Amount ($)'; $('sDiscInput').value = d.discountValue || 0; }
+  else { $('sDiscType').value = 'None'; }
+  toggleDisc(); recalcSale();
+  if(scanResultData.verification && !scanResultData.verification.clean){
+    toast('⚠️ Foomka waa la buuxiyay - laakiin xisaabta waa in la hubiyaa (eeg digniinta cas) ka hor inta aan la kaydin.');
+  } else {
+    toast('Foomka waa la buuxiyay - hubi kadibna kaydi.');
+  }
+}
+
+/* ================= Expense Scan (AI - Gemini Vision) ================= */
+var expScanResultData = null;
+function toggleExpScan(){ $('expScanWrap').classList.toggle('hidden'); }
+function scanExpFile(){
+  var f = $('expScanFile').files[0];
+  if(!f) return;
+  if(!hasBackend()){ $('expScanStatus').textContent = 'Scan-ku wuxuu u baahan yahay backend dhab ah (Google Sheets) + Gemini API Key oo Settings lagu geliyay.'; return; }
+  var img = $('expScanPreview');
+  img.src = URL.createObjectURL(f);
+  img.classList.remove('hidden');
+  $('expScanText').classList.add('hidden');
+  $('expScanText').innerHTML = '';
+  expScanResultData = null;
+  $('expScanStatus').textContent = 'Waa la akhrinayaa rasiidhka (Gemini Vision) - sug...';
+  var reader = new FileReader();
+  reader.onload = function(){
+    var base64 = String(reader.result).split(',')[1];
+    google.script.run
+      .withSuccessHandler(function(res){ onExpScanResult(res); })
+      .withFailureHandler(function(e){ $('expScanStatus').textContent = 'Khalad: ' + e.message; })
+      .scanExpenseImage(state.token, base64, f.type || 'image/jpeg');
+  };
+  reader.onerror = function(){ $('expScanStatus').textContent = 'Khalad akhrinta sawirka.'; };
+  reader.readAsDataURL(f);
+}
+function onExpScanResult(res){
+  if(res && res.error === 'login'){ forceLogin(); return; }
+  if(!res || !res.ok){ $('expScanStatus').textContent = (res && res.msg) ? res.msg : 'Scan-ku wuu fashilmay.'; return; }
+  expScanResultData = res;
+  var d = res.data;
+  var html = '';
+  html += '<div class="row"><span class="k">Taariikh</span><span class="v">'+esc(d.date||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Qaybta</span><span class="v">'+esc(d.category||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Sharaxaad</span><span class="v">'+esc(d.description||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Qadarka</span><span class="v">'+fmt(d.amount)+'</span></div>';
+  html += '<div class="row"><span class="k">Meel/Dhaxasho</span><span class="v">'+esc(d.vendor||'-')+'</span></div>';
+  html += '<div class="row"><span class="k">Habka</span><span class="v">'+esc(d.payMethod||'Cash')+'</span></div>';
+  $('expScanText').innerHTML = html;
+  $('expScanText').classList.remove('hidden');
+  $('expScanStatus').textContent = 'Dhammeystay - hubi kadibna riix "Buuxi Foomka".';
+}
+function fillExpFromScan(){
+  if(!expScanResultData || !expScanResultData.ok){ toast('Marka hore scan sawirka.'); return; }
+  var d = expScanResultData.data;
+  if(d.date) $('eDate').value = d.date;
+  if(d.category){
+    var catSelect = $('eCat');
+    var found = false;
+    for(var i=0; i<catSelect.options.length; i++){
+      if(catSelect.options[i].value.toLowerCase() === String(d.category).toLowerCase()){
+        catSelect.selectedIndex = i; found = true; break;
+      }
+    }
+    if(!found){
+      catSelect.value = 'Other';
+      toggleCat();
+      $('eNewCat').value = d.category;
+    }
+  }
+  $('eDesc').value = [d.description, d.vendor].filter(Boolean).join(' — ');
+  if(d.amount && Number(d.amount) > 0) $('eAmount').value = d.amount;
+  if(d.payMethod){
+    var pmSelect = $('ePayMethod');
+    for(var j=0; j<pmSelect.options.length; j++){
+      if(pmSelect.options[j].value === d.payMethod){ pmSelect.selectedIndex = j; break; }
+    }
+  }
+  toast('Foomka waa la buuxiyay - hubi kadibna kaydi.');
+}
+
+/* ================= Entry forms ================= */
+function openSale(){
+  $('sDate').value = $('sDate').value || new Date().toISOString().slice(0,10);
+  $('sGross').value = ''; $('sDiscInput').value = ''; $('sInitial').value = '';
+  $('sDiscType').value = 'None'; toggleDisc(); recalcSale(); togglePerson();
+  openModal('saleModal');
+}
+function submitSale(){
+  var dist = $('sDistrict').value;
+  if(dist === '__new__'){
+    dist = $('sNewDist').value.trim();
+    if(!dist){ toast('Qor magaca degmada/magaalada/xaafadda cusub.'); return; }
+    if(customDistricts.indexOf(dist) === -1){
+      customDistricts.push(dist);
+      var dSel2 = $('sDistrict');
+      var opt = new Option(dist, dist);
+      dSel2.insertBefore(opt, dSel2.options[dSel2.options.length - 1]);
+    }
+  }
+  var person = $('sPerson').value;
+  if(person === '__new__'){
+    person = $('sNewPerson').value.trim();
+    if(!person){ toast('Qor magaca iibiyaha cusub.'); return; }
+    rememberPerson(person);
+    if(state.meta && state.meta.salespeople && state.meta.salespeople.indexOf(person) === -1) state.meta.salespeople.push(person);
+  }
+  var f = {
+    date: $('sDate').value, customer: $('sCustomer').value.trim(), phone: $('sPhone').value.trim(),
+    paper: $('sPaper').value.trim(),
+    custType: $('sType').value, district: dist, salesperson: person,
+    payMethod: $('sPayMethod').value, status: $('sStatus').value, gross: $('sGross').value,
+    discType: $('sDiscType').value, discInput: $('sDiscInput').value, initial: $('sInitial').value
+  };
+  if(!f.date || !f.customer || !f.salesperson){ toast('Fadlan buuxi taariikhda, macmiilka iyo iibiyaha.'); return; }
+  if(!(Number(f.gross) > 0)){ toast('Fadlan qor iibka guud.'); return; }
+  var discAmt = f.discType === 'Percent' ? Number(f.gross)*Number(f.discInput)/100 : (f.discType === 'Amount ($)' ? Number(f.discInput) : 0);
+  f.discount = isNaN(discAmt) ? 0 : Math.round(discAmt*100)/100;
+  var btn = $('saleSaveBtn'); btn.disabled = true;
+  function done(res){
+    btn.disabled = false;
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la kaydiyay.');
+    closeModal('saleModal');
+    applyFilter();
+  }
+  if(!hasBackend()){ done(demoAddSale(f)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ btn.disabled=false; toast('Khalad: '+e.message); }).addSale(state.token, f);
+}
+function openExp(){
+  $('eAmount').value = ''; $('eDesc').value = '';
+  $('eCat').value = 'Kirada'; toggleCat();
+  openModal('expModal');
+}
+var itemRowSeq = 0;
+function addItemRow(product, qty, unitCost){
+  itemRowSeq++;
+  var rid = 'ir'+itemRowSeq;
+  var row = document.createElement('div');
+  row.className = 'item-row'; row.id = rid;
+  row.innerHTML =
+    '<input type="text" class="ir-product" placeholder="Product" value="'+(product?esc(product):'')+'">' +
+    '<input type="number" class="ir-qty" min="1" step="1" placeholder="Qty" value="'+(qty||1)+'" oninput="updateGrandTotal()">' +
+    '<input type="number" class="ir-cost" min="0" step="0.01" placeholder="Unit Cost" value="'+(unitCost||0)+'" oninput="updateGrandTotal()">' +
+    '<span class="item-total">$0.00</span>' +
+    '<button type="button" class="item-del" onclick="removeItemRow(\''+rid+'\')">✕</button>';
+  $('itemRows').appendChild(row);
+  updateGrandTotal();
+}
+function removeItemRow(rid){
+  var el = document.getElementById(rid);
+  if(el) el.remove();
+  updateGrandTotal();
+}
+function updateGrandTotal(){
+  var rows = document.querySelectorAll('#itemRows .item-row');
+  var grand = 0;
+  rows.forEach(function(row){
+    var qty = Number(row.querySelector('.ir-qty').value) || 0;
+    var cost = Number(row.querySelector('.ir-cost').value) || 0;
+    var t = qty * cost;
+    row.querySelector('.item-total').textContent = fmt(t);
+    grand += t;
+  });
+  $('pGrandTotal').textContent = fmt(grand);
+}
+function openPurch(){
+  $('pDate').value = new Date().toISOString().slice(0,10);
+  $('pSupplier').value = ''; $('pNotes').value = '';
+  $('itemRows').innerHTML = '';
+  addItemRow();
+  openModal('purchModal');
+}
+function submitPurch(){
+  var rows = document.querySelectorAll('#itemRows .item-row');
+  var items = [];
+  rows.forEach(function(row){
+    var product = row.querySelector('.ir-product').value.trim();
+    var qty = row.querySelector('.ir-qty').value;
+    var unitCost = row.querySelector('.ir-cost').value;
+    if(product && Number(qty) > 0) items.push({product:product, qty:qty, unitCost:unitCost});
+  });
+  var f = { date: $('pDate').value, supplier: $('pSupplier').value.trim(), notes: $('pNotes').value.trim(), items: items };
+  if(!f.date){ toast('Fadlan buuxi taariikhda dalabka.'); return; }
+  if(!items.length){ toast('Fadlan geli ugu yaraan hal alaab (Product + Qty).'); return; }
+  var btn = $('purchSaveBtn'); btn.disabled = true;
+  function done(res){
+    btn.disabled = false;
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la kaydiyay.');
+    closeModal('purchModal');
+    applyFilter();
+  }
+  if(!hasBackend()){ done(demoAddPurchase(f)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ btn.disabled=false; toast('Khalad: '+e.message); }).createOrder(state.token, f);
+}
+var receivedOrderIdVal = null;
+function openReceived(id){
+  receivedOrderIdVal = id;
+  var od = lastOrdersData;
+  var ord = od ? od.pending.filter(function(o){ return o.id === id; })[0] : null;
+  $('receivedOrderId').textContent = id + (ord && ord.supplier ? ' — ' + ord.supplier : '');
+  var list = $('receivedItemsList');
+  if(ord){
+    list.innerHTML = ord.items.map(function(it){
+      return '<div class="row"><span class="k">'+esc(it.product)+' × '+it.qty+'</span><span class="v">'+fmt(it.total)+'</span></div>';
+    }).join('');
+    $('receivedOrderTotal').textContent = fmt(ord.total);
+  } else { list.innerHTML = ''; $('receivedOrderTotal').textContent = '-'; }
+  $('rCargo').value = ''; $('rOther').value = '';
+  openModal('receivedModal');
+}
+function submitReceived(){
+  if(!receivedOrderIdVal){ return; }
+  var cargo = $('rCargo').value || 0, other = $('rOther').value || 0;
+  var btn = $('receivedSaveBtn'); btn.disabled = true;
+  function done(res){
+    btn.disabled = false;
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la cusboonaysiiyay.');
+    closeModal('receivedModal');
+    applyFilter();
+  }
+  if(!hasBackend()){ done(demoMarkReceived(receivedOrderIdVal, cargo, other)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ btn.disabled=false; toast('Khalad: '+e.message); }).receiveOrder(state.token, receivedOrderIdVal, cargo, other);
+}
+function doCancelOrder(id){
+  if(!confirm('Ma hubtaa inaad joojinayso dalabkan?')) return;
+  function done(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la joojiyay.');
+    applyFilter();
+  }
+  if(!hasBackend()){ done(demoCancelOrder(id)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).cancelOrder(state.token, id);
+}
+function submitExp(){
+  var f = {
+    date: $('eDate').value, category: $('eCat').value, newCat: $('eNewCat').value.trim(),
+    desc: $('eDesc').value.trim(), amount: $('eAmount').value, paidBy: $('ePaidBy').value.trim(), payMethod: $('ePayMethod').value
+  };
+  if(!f.date || !(Number(f.amount) > 0)){ toast('Fadlan buuxi taariikhda iyo qadarka.'); return; }
+  if(f.category === 'Other' && !f.newCat){ toast('Qor magaca qaybta cusub.'); return; }
+  var btn = $('expSaveBtn'); btn.disabled = true;
+  function done(res){
+    btn.disabled = false;
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    toast(res && res.msg ? res.msg : 'Waa la kaydiyay.');
+    closeModal('expModal');
+    applyFilter();
+  }
+  if(!hasBackend()){ done(demoAddExpense(f)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ btn.disabled=false; toast('Khalad: '+e.message); }).addExpense(state.token, f);
+}
+
+/* ================= Receipt ================= */
+function openReceipt(){
+  $('rInvoice').value = '';
+  $('receiptWrap').classList.add('hidden');
+  $('receiptErr').classList.add('hidden');
+  openModal('receiptModal');
+}
+function findReceipt(){
+  var q = $('rInvoice').value;
+  if(!q.trim()){ toast('Geli Invoice ID.'); return; }
+  function done(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    if(!res || !res.ok){
+      $('receiptErr').textContent = res && res.msg ? res.msg : 'Invoice lama helin.';
+      $('receiptErr').classList.remove('hidden');
+      $('receiptWrap').classList.add('hidden');
+      return;
+    }
+    $('receiptErr').classList.add('hidden');
+    var r = res.r;
+    var bizName = (state.meta && state.meta.bizName) ? esc(state.meta.bizName) : 'HAPPY HOME';
+    var bizInfo = (state.meta && state.meta.bizInfo) ? esc(state.meta.bizInfo) : '';
+    var bizLogo = (state.meta && state.meta.bizLogo) ? state.meta.bizLogo : defaultLogo();
+    var bal = r.balance > 0 ? '<span style="color:#f87171">'+fmt(r.balance)+'</span>' : '<span style="color:#4ade80">'+fmt(r.balance)+'</span>';
+    $('receiptBody').innerHTML =
+      '<div class="rh">' +
+        (bizLogo ? '<img src="' + bizLogo + '" alt="logo" style="width:44px;height:44px;border-radius:10px;display:block;margin:0 auto 6px;object-fit:cover;">' : '') +
+        '<div class="nm">' + bizName + '</div>' +
+        (bizInfo ? '<div style="font-size:10.5px;color:var(--muted);margin-bottom:2px;line-height:1.35;">'+bizInfo+'</div>' : '') +
+        '<div style="font-size:11px;color:var(--muted)">Receipt / Qaan-qaad</div></div>' +
+      '<div class="row"><span class="k">Invoice ID</span><span class="v">'+esc(r.invoiceId)+'</span></div>' +
+      (r.paper ? '<div class="row"><span class="k">Paper No.</span><span class="v">'+esc(r.paper)+'</span></div>' : '') +
+      '<div class="row"><span class="k">Taariikh</span><span class="v">'+esc(r.date)+'</span></div>' +
+      '<div class="row"><span class="k">Macmiil</span><span class="v">'+esc(r.customer)+'</span></div>' +
+      (r.phone ? '<div class="row"><span class="k">Telefoon</span><span class="v">'+esc(r.phone)+'</span></div>' : '') +
+      (r.location ? '<div class="row"><span class="k">Goobta</span><span class="v">'+esc(r.location)+'</span></div>' : '') +
+      '<div class="row"><span class="k">Iibiyaha</span><span class="v">'+esc(r.salesperson)+'</span></div>' +
+      '<div class="row"><span class="k">Iibka Guud</span><span class="v">'+fmt(r.gross)+'</span></div>' +
+      (r.discount > 0 ? '<div class="row"><span class="k">Discount</span><span class="v">-'+fmt(r.discount)+'</span></div>' : '') +
+      '<div class="row total"><span class="k">Wadarta (Net)</span><span class="v">'+fmt(r.net)+'</span></div>' +
+      '<div class="row"><span class="k">Lacagta La Bixiyay</span><span class="v">'+fmt(r.totalPaid)+'</span></div>' +
+      '<div class="row"><span class="k">Harteed (Balance)</span><span class="v">'+bal+'</span></div>' +
+      '<div class="row"><span class="k">Heerka</span><span class="v">'+esc(r.status)+'</span></div>';
+    $('receiptWrap').classList.remove('hidden');
+  }
+  if(!hasBackend()){ done(demoGetReceipt(q)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).getReceipt(state.token, q);
+}
+function printReceipt(){
+  document.body.classList.add('print-receipt');
+  setTimeout(function(){ window.print(); }, 60);
+}
+function printDashboard(){ window.print(); }
+
+/* ================= Customer search ================= */
+function openCust(){
+  $('cQuery').value = '';
+  $('custResults').classList.add('hidden');
+  openModal('custModal');
+}
+function findCustomer(){
+  var q = $('cQuery').value;
+  if(!q.trim()){ toast('Geli telefoonka ama magaca.'); return; }
+  function done(res){
+    if(res && res.error === 'login'){ forceLogin(); return; }
+    var box = $('custResults');
+    if(!res || !res.items || !res.items.length){
+      box.innerHTML = '<div class="empty">Macmiil lama helin: "'+esc(q)+'"</div>';
+    } else {
+      var rows = res.items.map(function(r){
+        return '<tr><td class="mono">'+esc(r.date)+'</td><td class="mono">'+esc(r.invoiceId)+'</td>'+
+          '<td>'+esc(r.customer)+'</td><td>'+esc(r.phone)+'</td>'+
+          '<td class="mono pos">'+fmt(r.net)+'</td>'+
+          '<td class="mono '+(r.balance>0?'neg':'')+'">'+fmt(r.balance)+'</td>'+
+          '<td><span class="pill">'+esc(r.status)+'</span></td></tr>';
+      }).join('');
+      box.innerHTML = '<div class="hint">Waxaa la helay: '+res.items.length+' iib</div>'+
+        '<div class="tbl-scroll"><table><thead><tr><th>Taariikh</th><th>Invoice</th><th>Macmiil</th><th>Tel</th><th>Iibka</th><th>Harteed</th><th>Heer</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    }
+    box.classList.remove('hidden');
+  }
+  if(!hasBackend()){ done(demoSearchCustomer(q)); return; }
+  google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ toast('Khalad: '+e.message); }).searchCustomer(state.token, q);
+}
+
+/* ================= Export CSV ================= */
+function exportCSV(){
+  var d;
+  if(!hasBackend()){ d = demoData(state.filter); } else { toast('Export: xogta hadda la muujiyay'); return; }
+  var lines = ['Taariikh,Macmiil,Iibiyaha,Degmo,Iibka,Harteed'];
+  d.recentSales.forEach(function(r){
+    lines.push([r.date, '"'+r.customer+'"', r.salesperson, r.district, r.net, r.balance].join(','));
+  });
+  lines.push('');
+  lines.push('KPI,,,,' );
+  lines.push('Iibka Guud,,,,' + d.kpi.sales);
+  lines.push('Kharashka,,,,' + d.kpi.expenses);
+  lines.push("Faa'iidada,,,," + d.kpi.net);
+  var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'happyhome-export.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ================= Boot ================= */
+window.addEventListener('load', function(){
+  var th = store.getItem('hh_theme');
+  if(th === 'light' || location.hash === '#light'){ document.body.classList.add('light'); LIGHT = true; }
+  var hm = location.hash.match(/^#theme=(\w+)/);
+  if(hm && THEMES[hm[1]]) store.setItem('hh_theme_palette', hm[1]);
+  if(location.hash === '#login'){ showLogin(); return; }
+  var t = store.getItem('hh_token');
+  if(!hasBackend()){
+    state.user = { user:'demo', name:'Demo Admin', role:'Admin' };
+    enterDashboard();
+    toast('Tijaabo (Demo): xog tijaabo ah ayaa lagu tusayaa - login-ka dhabta ah wuxuu shaqeeyaa Google Sheets-ka.');
+    var rh = location.hash.match(/^#receipt=(.+)/);
+    if(rh){ setTimeout(function(){ openReceipt(); $('rInvoice').value = decodeURIComponent(rh[1]); findReceipt(); }, 700); }
+    return;
+  }
+  if(t){
+    state.token = t;
+    google.script.run
+      .withSuccessHandler(function(meta){
+        if(meta && meta.error === 'login'){ return; }
+        google.script.run.withSuccessHandler(function(u){
+          if(u){ state.user = u; enterDashboard(); } else { showLogin(); }
+        }).whoAmI(t);
+      })
+      .withFailureHandler(function(){ showLogin(); })
+      .getMeta(t);
+  } else {
+    showLogin();
+  }
+});
+function showLogin(){
+  $('dashView').classList.add('hidden');
+  $('loginView').classList.remove('hidden');
+  applyBranding();
+  $('loginUser').focus();
+}
+/* ================= AI Chat ================= */
+var chatHistory = [];
+var chatOpen = false;
+function toggleChat(){
+  chatOpen = !chatOpen;
+  $('chatPanel').classList.toggle('hidden', !chatOpen);
+  if(chatOpen) $('chatInput').focus();
+}
+function sendChat(){
+  var msg = $('chatInput').value.trim();
+  if(!msg) return;
+  $('chatInput').value = '';
+  var body = $('chatBody');
+  body.innerHTML += '<div class="chat-msg user">'+esc(msg)+'</div>';
+  body.scrollTop = body.scrollHeight;
+  chatHistory.push({role:'user', text:msg});
+  var ctx = '';
+  try { if(state && state.kpiData){ var k=state.kpiData; ctx='Iibka: $'+k.sales+', Kharashka: $'+k.expenses+', Faa\'iidada: $'+k.net+', Margin: '+k.margin+'%, Dalabyada: '+k.orders; if(state.filter&&state.filter.month) ctx+=', Bisha: '+state.filter.month+'/'+state.filter.year; } } catch(e){}
+  var thinkingDiv = document.createElement('div');
+  thinkingDiv.className = 'chat-msg ai';
+  thinkingDiv.textContent = '...';
+  body.appendChild(thinkingDiv);
+  body.scrollTop = body.scrollHeight;
+  var isVercel = !!window.__VERCEL_ADAPTER__;
+  if(isVercel){
+    fetch('/api/ai-chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg,context:ctx,history:chatHistory.slice(-10)}) })
+    .then(function(r){return r.json();}).then(function(j){ thinkingDiv.textContent=j.reply||j.error||'Jawaab lama helin.'; chatHistory.push({role:'assistant',text:thinkingDiv.textContent}); body.scrollTop=body.scrollHeight; })
+    .catch(function(e){ thinkingDiv.textContent='Khalad: '+e.message; });
+  } else if(hasBackend()){
+    google.script.run.withSuccessHandler(function(j){ thinkingDiv.textContent=(j&&j.reply)||'Jawaab lama helin.'; chatHistory.push({role:'assistant',text:thinkingDiv.textContent}); body.scrollTop=body.scrollHeight; }).withFailureHandler(function(e){ thinkingDiv.textContent='Khalad: '+e.message; }).aiChat(state.token, msg, ctx, chatHistory.slice(-10));
+  } else {
+    thinkingDiv.textContent = demoChatReply(msg, ctx);
+    chatHistory.push({role:'assistant',text:thinkingDiv.textContent});
+    body.scrollTop = body.scrollHeight;
+  }
+}
+function demoChatReply(msg, ctx){
+  var m = msg.toLowerCase();
+  if(m.indexOf('iib')!==-1||m.indexOf('sales')!==-1) return 'Iibka bishaan (demo): $2,700. Marka backend dhab ah la isticmaalo, AI waxay ku hubinaysaa tirooyinka sheet-kaaga.';
+  if(m.indexOf('kharash')!==-1||m.indexOf('expense')!==-1) return 'Kharashka bishaan (demo): $1,910. Qaybaha: Kirada $500, Shaqaalaha $350, Xayeysiiska $460, Qalabka $600.';
+  if(m.indexOf('faai')!==-1||m.indexOf('profit')!==-1) return 'Faa\'iidada dhabta = Iibka \u2212 Kharashka = $2,700 \u2212 $1,910 = $790. Margin: 29.26%.';
+  if(m.indexOf('hubi')!==-1||m.indexOf('check')!==-1) return 'Xisaabta Ogos 2026 (demo):\n\u2022 Iibka: $2,700\n\u2022 Kharashka: $1,910\n\u2022 Faa\'iidada: $790 (\u2713)\n\u2022 Margin: 29.26%';
+  return 'Waan fahmay. Demo mode-ka xogta ma hayo. Marka Vercel + Google Sheets la isticmaalo, waxaan si dhab ah u jawaabi doonaa. Tusaale: "Bisha Ogos imisa iibka?" ama "Xisaabta hubi".';
+}
+</script>
+
+<div id="chatPanel" class="chat-panel hidden">
+  <div class="chat-header">
+    <h3>🤖 AI Chat — Happy Home</h3>
+    <button onclick="toggleChat()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody">
+    <div class="chat-msg ai">Assalamu Alaykum! Waxaan ahay AI assistant-kaaga. Waydii wax kasta oo ku saabsan iibka, kharashka, faai'idada, ama xisaabta. Tusaale: "Bisha Ogos imisa iibka waa?" ama "Xisaabta hubi".</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chatInput" placeholder="Su'aal ama amar..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">Dir</button>
+  </div>
+</div>
+<button class="chat-fab" onclick="toggleChat()">💬</button>
+
+</body></html>
